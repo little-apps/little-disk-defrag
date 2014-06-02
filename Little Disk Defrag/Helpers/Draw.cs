@@ -52,6 +52,8 @@ namespace Little_Disk_Defrag.Helpers
                 return;
             }
 
+            // This was the fastest way to draw multiple objects on WPF
+
             foreach (MyRect mRect in rects)
             {
                 dc.DrawRectangle(mRect.Brush, null, mRect.Rect);
