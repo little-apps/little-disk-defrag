@@ -62,7 +62,6 @@
       <DependentUpon>Drawing.xaml</DependentUpon>
     </Compile>
     <Compile Include="Helpers\Draw.cs" />
-    <Compile Include="Helpers\DrawingObject.cs" />
     <Compile Include="Misc\Permissions.cs" />
     <Compile Include="Report.xaml.cs">
       <DependentUpon>Report.xaml</DependentUpon>

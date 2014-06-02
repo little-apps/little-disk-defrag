@@ -88,6 +88,11 @@ namespace Little_Disk_Defrag
             get { return this._priorities; }
         }
 
+        public bool IsDefragmentActive
+        {
+            get { return ((this._thread != null) && this._thread.IsAlive); }
+        }
+
         public string SelectedDrive
         {
             get { return this._selectedDrive; }
@@ -151,10 +156,7 @@ namespace Little_Disk_Defrag
 
         public string ProgressBarText
         {
-            get
-            {
-                return Math.Round(this._progressBarValue,2).ToString() + "%";
-            }
+            get { return Math.Round(this._progressBarValue,2).ToString() + "%"; }
         }
 
         public string StatusText
@@ -171,7 +173,7 @@ namespace Little_Disk_Defrag
         {
             get
             {
-                if ((this._thread != null) && this._thread.IsAlive)
+                if (this.IsDefragmentActive)
                     return "Stop";
                 else
                     return "Start";
@@ -182,7 +184,7 @@ namespace Little_Disk_Defrag
         {
             get
             {
-                return (!(((this._thread != null) && this._thread.IsAlive) && !this._defragger.IsDoneYet && !this._defragger.HasError));
+                return (!(this.IsDefragmentActive && !this._defragger.IsDoneYet && !this._defragger.HasError));
             }
         }
 
@@ -194,7 +196,7 @@ namespace Little_Disk_Defrag
 
                 string Percent = string.Format("{0:F2}%", this.ProgressBarValue);
 
-                if (this._defragger.IsActive)
+                if (this.IsDefragmentActive)
                     DefragText = Percent + " - " + this._defragger.Volume.RootPath + " - " + DefragText;
 
                 return DefragText;
@@ -306,7 +308,7 @@ namespace Little_Disk_Defrag
 
         private void btnStartStop_Click(object sender, RoutedEventArgs e)
         {
-            if (!this._defragger.IsActive)
+            if (!this.IsDefragmentActive)
             {
                 this._defragger.Reset();
 
@@ -349,7 +351,7 @@ namespace Little_Disk_Defrag
 
         private void btnExit_Click(object sender, RoutedEventArgs e)
         {
-            if (!this._defragger.IsActive)
+            if (!this.IsDefragmentActive)
             {   
                 // This is the code executing when quitting
                 this.Close();

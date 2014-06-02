@@ -72,11 +72,6 @@ namespace Little_Disk_Defrag.Helpers
             get { return this.Error; }
         }
 
-        public bool IsActive
-        {
-            get {  return (this._driveVolume != null); }
-        }
-
         public bool ShowReport
         {
             get { return this._showReport; }
