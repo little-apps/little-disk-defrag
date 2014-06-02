@@ -39,6 +39,7 @@ namespace Little_Disk_Defrag.Helpers
         private string _statusString;
         private double _statusPercent;
         private bool _showReport;
+        private bool _updateDrawing;
 
         private object _lock = new object();
 
@@ -126,6 +127,14 @@ namespace Little_Disk_Defrag.Helpers
             get { return this._driveVolume; }
         }
 
+        public bool VolumeOpen { get; set; }
+
+        public bool UpdateDrawing
+        {
+            get { return this._updateDrawing; }
+            set { this._updateDrawing = value; }
+        }
+
         public Defragment()
         {
             this._defragReport = new DefragReport();
@@ -146,23 +155,65 @@ namespace Little_Disk_Defrag.Helpers
             StatusPercent = 0;
         }
 
-        public void Open(string volume, DefragMethod method)
+        public void Open(string volume, bool silent = false)
         {
             this._driveVolume = new DriveVolume();
 
-            this._method = method;
             this._driveName = volume;
 
-            this.StatusString = "Opening volume " + volume;
+            if (!silent)
+                this.StatusString = "Opening volume " + volume;
+
             if (!Volume.Open(volume))
             {
-                this.StatusString = "Error opening volume " + volume;
+                if (!silent)
+                {
+                    this.StatusString = "Error opening volume " + volume;
+                    this.StatusPercent = 100.0f;
+                }
+
                 Error = true;
                 Done = true;
-                StatusPercent = 100.0f;
 
-                this._driveVolume = null;
+                this.VolumeOpen = false;
+
+                return;
             }
+
+            this.VolumeOpen = true;
+
+            if (!silent)
+                this.StatusString = "Getting volume bitmap";
+
+            if (!Volume.GetBitmap())
+            {
+                if (!silent)
+                    this.StatusString = "Could not get volume " + DriveName + " bitmap";
+
+                Error = true;
+
+                this.Close();
+
+                return;
+            }
+
+            this.UpdateDrawing = true;
+        }
+
+        public void SetMethod(DefragMethod method)
+        {
+            this._method = method;
+        }
+
+        public void CloseVolume()
+        {
+            if (!this.VolumeOpen)
+                return;
+
+            if (this._driveVolume == null)
+                return;
+
+            this.Volume.Dispose();
         }
 
         public void Close()
@@ -174,13 +225,9 @@ namespace Little_Disk_Defrag.Helpers
                 OldStatus = this.StatusString;
                 StatusPercent = 99.999999f;
 
-                if (this._driveVolume != null)
-                {
-                    this.StatusString = "Closing volume " + DriveName;
+                this.StatusString = "Closing volume " + DriveName;
 
-                    Volume.Dispose();
-                    this._driveVolume = null;
-                }
+                this.CloseVolume();
 
                 StatusPercent = 100.0f;
 
@@ -195,7 +242,7 @@ namespace Little_Disk_Defrag.Helpers
                 this._driveName = "";
 
                 if (!Error && !PleaseStop)
-                    this._showReport = true; // causes report window to open
+                    this.ShowReport = true; // causes report window to open
 
                 Done = true;
             }
@@ -226,6 +273,8 @@ namespace Little_Disk_Defrag.Helpers
                     this.Close();
                     return;
                 }
+
+                this.UpdateDrawing = true;
 
                 this._lastBMPUpdate = DateTime.Now;
 

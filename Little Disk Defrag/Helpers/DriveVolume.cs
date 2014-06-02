@@ -30,8 +30,7 @@ namespace Little_Disk_Defrag.Helpers
 {
     public class DriveVolume : IDisposable
     {
-        private IntPtr Handle;
-        private Dictionary<ulong, bool> Clusters = new Dictionary<ulong, bool>();
+        public IntPtr Handle;
         private byte[] BitmapDetail;
         private string _rootPath;
         private PInvoke.DISK_GEOMETRY Geometry;
@@ -67,6 +66,14 @@ namespace Little_Disk_Defrag.Helpers
         public int DBDirCount
         {
             get { return this._directoryList.Count; }
+        }
+
+        public bool BitmapLoaded
+        {
+            get
+            {
+                return (!((this.BitmapDetail == null) || this.BitmapDetail.Length == 0));
+            }
         }
 
         public DriveVolume()
@@ -582,9 +589,6 @@ namespace Little_Disk_Defrag.Helpers
 
             LCNResult = 0;
 
-            // Make sure we don't spill over our array
-            Max = Utils.Min(this.VolInfo.ClusterCount, 8 * 4096);
-
             for (i = StartLCN; i < this.VolInfo.ClusterCount; i++)
             {
                 bool Found = true;
@@ -593,7 +597,7 @@ namespace Little_Disk_Defrag.Helpers
                 if (IsClusterUsed(i))
                     Found = false;
                 else
-                // THen check the last cluster
+                // Then check the last cluster
                 if (IsClusterUsed(i + ReqLength - 1))
                     Found = false;
                 else

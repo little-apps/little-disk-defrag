@@ -42,6 +42,7 @@ namespace Little_Disk_Defrag.Misc
         internal const uint FILE_WRITE_ATTRIBUTES = 0x0100;
         internal const uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
 
+        internal const uint ERROR_HANDLE_EOF = 38;
         internal const uint ERROR_INSUFFICIENT_BUFFER = 122;
         internal const uint ERROR_MORE_DATA = 234;
 
@@ -84,56 +85,24 @@ namespace Little_Disk_Defrag.Misc
 
         #region DLL Functions
         [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern IntPtr CreateFile(
-            string lpFileName,
-            uint dwDesiredAccess,
-            uint dwShareMode,
-            IntPtr lpSecurityAttributes,
-            uint dwCreationDisposition,
-            uint dwFlagsAndAttributes,
-            IntPtr hTemplateFile);
+        internal static extern IntPtr CreateFile(string lpFileName, uint dwDesiredAccess, uint dwShareMode, IntPtr lpSecurityAttributes, uint dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern int CloseHandle(IntPtr hObject);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern bool DeviceIoControl(
-            IntPtr hDevice,
-            uint dwIoControlCode,
-            IntPtr lpInBuffer,
-            uint nInBufferSize,
-            [Out] IntPtr lpOutBuffer,
-            uint nOutBufferSize,
-            ref uint lpBytesReturned,
-            IntPtr lpOverlapped);
+        internal static extern bool DeviceIoControl(IntPtr hDevice, uint dwIoControlCode, IntPtr lpInBuffer, uint nInBufferSize, [Out] IntPtr lpOutBuffer, uint nOutBufferSize, ref uint lpBytesReturned, IntPtr lpOverlapped);
 
         [DllImport("Kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool GetVolumeInformation(
-          string RootPathName,
-          StringBuilder VolumeNameBuffer,
-          int VolumeNameSize,
-          out uint VolumeSerialNumber,
-          out uint MaximumComponentLength,
-          out FileSystemFeature FileSystemFlags,
-          StringBuilder FileSystemNameBuffer,
-          int nFileSystemNameSize);
+        internal static extern bool GetVolumeInformation(string RootPathName, StringBuilder VolumeNameBuffer, int VolumeNameSize, out uint VolumeSerialNumber, out uint MaximumComponentLength, out FileSystemFeature FileSystemFlags, StringBuilder FileSystemNameBuffer, int nFileSystemNameSize);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        internal static extern bool GetDiskFreeSpace(
-            string lpRootPathName,
-            out uint lpSectorsPerCluster,
-            out uint lpBytesPerSector,
-            out uint lpNumberOfFreeClusters,
-            out uint lpTotalNumberOfClusters);
+        internal static extern bool GetDiskFreeSpace(string lpRootPathName, out uint lpSectorsPerCluster, out uint lpBytesPerSector, out uint lpNumberOfFreeClusters, out uint lpTotalNumberOfClusters);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool GetDiskFreeSpaceEx(
-            string lpDirectoryName,
-            out ulong lpFreeBytesAvailable,
-            out ulong lpTotalNumberOfBytes,
-            out ulong lpTotalNumberOfFreeBytes);
+        internal static extern bool GetDiskFreeSpaceEx(string lpDirectoryName, out ulong lpFreeBytesAvailable, out ulong lpTotalNumberOfBytes, out ulong lpTotalNumberOfFreeBytes);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         internal static extern IntPtr FindFirstFile(string lpFileName, out WIN32_FIND_DATA lpFindFileData);
@@ -145,10 +114,7 @@ namespace Little_Disk_Defrag.Misc
         internal static extern bool FindClose(IntPtr hFindFile);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern bool GetFileInformationByHandle(
-            IntPtr hFile,
-            out BY_HANDLE_FILE_INFORMATION lpFileInformation
-        );
+        internal static extern bool GetFileInformationByHandle(IntPtr hFile, out BY_HANDLE_FILE_INFORMATION lpFileInformation);
 
         [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
         internal static extern bool AdjustTokenPrivileges(IntPtr htok, bool disall, ref TokPriv1Luid newst, int len, IntPtr prev, IntPtr relen);
@@ -238,7 +204,16 @@ namespace Little_Disk_Defrag.Misc
                     Buffer = null;
                 }
             }
-            
+
+            public VOLUME_BITMAP_BUFFER(IntPtr pBitmap, int bufferSize)
+            {
+                StartingLcn = (PInvoke.LARGE_INTEGER)Marshal.PtrToStructure(pBitmap, typeof(PInvoke.LARGE_INTEGER));
+                BitmapSize = (PInvoke.LARGE_INTEGER)Marshal.PtrToStructure(IntPtr.Add(pBitmap, 8), typeof(PInvoke.LARGE_INTEGER));
+
+                Buffer = new byte[bufferSize];
+
+                Marshal.Copy(IntPtr.Add(pBitmap, 16), Buffer, 0, bufferSize);
+            }
         }
 
         internal struct Extent

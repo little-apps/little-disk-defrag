@@ -18,9 +18,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Little_Disk_Defrag.Misc
 {
@@ -32,6 +36,40 @@ namespace Little_Disk_Defrag.Misc
 
         internal static ulong Max(ulong a, ulong b) {
             return (a > b ? a : b);
+        }
+
+        internal static Color HexToColor(uint argb)
+        {
+            Color col = Color.FromRgb((byte)((argb & 0xff0000) >> 0x10), (byte)((argb & 0xff00) >> 0x08), (byte)(argb & 0xff));
+
+            return col;
+        }
+
+        internal static uint LighterVal(uint col, int val)
+        {
+            uint r, g, b;
+
+            b = ((col >> 16) & 0xFF) + (uint)((float)val / 255 * 256);
+            g = ((col >> 8) & 0xFF) + (uint)((float)val / 255 * 256);
+            r = ((col & 0xFF) + (uint)((float)val / 255 * 256));
+
+            if (r > 255)
+                r = 255;
+
+            if (g > 255) 
+                g = 255;
+
+            if (b > 255)
+                b = 255;
+
+            col = (b << 16) | (g << 8) | r;
+
+            return col;
+        }
+
+        internal static uint ColorToUInt(Color col)
+        {
+            return (uint)(((col.A << 24) | (col.R << 16) | (col.G << 8) | col.B) & 0xffffffffL);
         }
 
         internal static string FitName (string path, string filename, int totalWidth)

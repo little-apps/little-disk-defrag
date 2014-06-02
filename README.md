@@ -18,7 +18,8 @@ Little Apps relies on people like you to keep our software running. If you would
 ### To do ###
 
  * Add NTFS file system support
- * Add drawing of disk clusters
+ * ~~Add drawing of disk clusters~~
  * Thorough testing
  * Make fast defragment faster
- * Detect SSD hard drives (they shouldn't be defragmented)
+ * Detect SSD hard drives as they shouldn't be defragmented ([See this article for an explanation on why](http://helpdeskgeek.com/featured-posts/should-you-defrag-an-ssd/))
+ * Add ability to click block in drawing and show files associated with it

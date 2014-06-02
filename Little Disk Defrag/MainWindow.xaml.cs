@@ -33,6 +33,7 @@ using System.Windows.Navigation;
 using System.IO;
 using System.Threading;
 using Little_Disk_Defrag.Helpers;
+using System.Windows.Threading;
 
 namespace Little_Disk_Defrag
 {
@@ -72,6 +73,8 @@ namespace Little_Disk_Defrag
         private Thread _thread;
         private Timer _timer;
 
+        private DispatcherTimer _resizeTimer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 0, 1500), IsEnabled = false };
+
         public List<string> Drives
         {
             get { return this._drives; }
@@ -92,6 +95,11 @@ namespace Little_Disk_Defrag
             {
                 this._selectedDrive = value;
                 this.OnPropertyChanged("SelectedDrive");
+
+                this._defragger.CloseVolume();
+
+                this._defragger.Open(this._selectedDrive, true);
+                this.ShowDrawing(this._defragger.Volume);
             }
         }
 
@@ -102,6 +110,17 @@ namespace Little_Disk_Defrag
             {
                 this._selectedAction = value;
                 this.OnPropertyChanged("SelectedAction");
+
+                Defragment.DefragMethod method;
+
+                if (this.SelectedAction == "Analyze")
+                    method = Defragment.DefragMethod.ANALYZE;
+                else if (this.SelectedAction == "Fast Defrag")
+                    method = Defragment.DefragMethod.FASTDEFRAG;
+                else
+                    method = Defragment.DefragMethod.NORMDEFRAG;
+
+                this._defragger.SetMethod(method);
             }
         }
 
@@ -152,7 +171,7 @@ namespace Little_Disk_Defrag
         {
             get
             {
-                if (this._defragger.IsActive && !this._defragger.IsDoneYet && !this._defragger.HasError)
+                if ((this._thread != null) && this._thread.IsAlive)
                     return "Stop";
                 else
                     return "Start";
@@ -163,7 +182,7 @@ namespace Little_Disk_Defrag
         {
             get
             {
-                return (!(this._defragger.IsActive && !this._defragger.IsDoneYet && !this._defragger.HasError));
+                return (!(((this._thread != null) && this._thread.IsAlive) && !this._defragger.IsDoneYet && !this._defragger.HasError));
             }
         }
 
@@ -185,6 +204,8 @@ namespace Little_Disk_Defrag
         public MainWindow()
         {
             InitializeComponent();
+
+            this._resizeTimer.Tick += _resizeTimer_Tick;
 
             this._timer = new Timer(new TimerCallback(UpdateDialog));
             this._timer.Change(0, 25);
@@ -209,6 +230,10 @@ namespace Little_Disk_Defrag
             this.SelectedPriority = "Normal";
 
             this.ProgressBarValue = 0;
+
+            this._defragger.Open(this.SelectedDrive, true);
+
+            this.ShowDrawing(this._defragger.Volume);
         }
 
         private void UpdateDialog(object o)
@@ -222,6 +247,17 @@ namespace Little_Disk_Defrag
 
             if (!this.ReEntrance)
             {
+                //if (this._defragger.Volume != null && this._defragger.UpdateDrawing)
+                //{
+                //    this.ReEntrance = true;
+
+                //    this.ShowDrawing(this._defragger.Volume);
+
+                //    this.ReEntrance = false;
+
+                //    this._defragger.UpdateDrawing = false;
+                //}
+
                 if (this._defragger.ShowReport)
                 {
                     // Show report
@@ -245,6 +281,17 @@ namespace Little_Disk_Defrag
             }
         }
 
+        private void ShowDrawing(DriveVolume volume)
+        {
+            if (this.Dispatcher.Thread != Thread.CurrentThread)
+            {
+                this.Dispatcher.Invoke(new Action<DriveVolume>(ShowDrawing), volume);
+                return;
+            }
+
+            this.drawing.SetDriveVolume(volume);
+        }
+
         private void ShowReport(Defragment defragger)
         {
             if (this.Dispatcher.Thread != Thread.CurrentThread)
@@ -263,16 +310,7 @@ namespace Little_Disk_Defrag
             {
                 this._defragger.Reset();
 
-                Defragment.DefragMethod method;
-
-                if (this.SelectedAction == "Analyze")
-                    method = Defragment.DefragMethod.ANALYZE;
-                else if (this.SelectedAction == "Fast Defrag")
-                    method = Defragment.DefragMethod.FASTDEFRAG;
-                else
-                    method = Defragment.DefragMethod.NORMDEFRAG;
-
-                this._defragger.Open(this.SelectedDrive, method);
+                this._defragger.Open(this.SelectedDrive);
 
                 this._thread = new Thread(new ThreadStart(this._defragger.Start));
 
@@ -321,6 +359,34 @@ namespace Little_Disk_Defrag
                 QuitWhenDone = true;
                 this.btnStartStop_Click(new object(), new RoutedEventArgs());
             }
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (!e.HeightChanged && !e.WidthChanged)
+                return;
+
+            if (double.IsNaN(e.NewSize.Width) || double.IsNaN(e.NewSize.Height))
+                return;
+
+            this.Width = e.NewSize.Width;
+            this.Height = e.NewSize.Height;
+
+            _resizeTimer.IsEnabled = true;
+            _resizeTimer.Stop();
+            _resizeTimer.Start();
+        }
+
+        void _resizeTimer_Tick(object sender, EventArgs e)
+        {
+            _resizeTimer.IsEnabled = false;
+
+            double w = this.Width;
+            double h = (this.Content as Grid).RowDefinitions[0].ActualHeight;
+
+            this.drawing.ChangeSize(w, h);
+
+            this.drawing.Redraw();
         }
     }
 }
