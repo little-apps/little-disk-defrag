@@ -198,7 +198,7 @@ namespace Little_Disk_Defrag
                 this.blocksPerLine = 1; // minimum size: 1 line
 
             this.clustersPerBlock = 0;
-            while ((ulong)this.blocksPerLine * (ulong)this.blockLines * this.clustersPerBlock < this.Volume.VolInfo.ClusterCount)
+            while ((ulong)this.blocksPerLine * (ulong)this.blockLines * this.clustersPerBlock < this.Volume.PartInfo.ClusterCount)
                 this.clustersPerBlock++;
 
             this.clustersPerLine = (ulong)this.blocksPerLine * (ulong)this.clustersPerBlock;
@@ -248,7 +248,7 @@ namespace Little_Disk_Defrag
 
             int[] BitShift = new int[] { 1, 2, 4, 8, 16, 32, 64, 128 };
 
-            ulong Max = Utils.Min(this.Volume.VolInfo.ClusterCount, 8*65536);
+            ulong Max = Utils.Min(this.Volume.PartInfo.ClusterCount, 8 * 65536);
 
             do
             {
@@ -390,7 +390,7 @@ namespace Little_Disk_Defrag
 
                 // Move to the next block
                 currLcn = BitmapBuffer.StartingLcn.QuadPart + i;
-            } while ((err == PInvoke.ERROR_MORE_DATA) && (currLcn < this.Volume.VolInfo.ClusterCount));
+            } while ((err == PInvoke.ERROR_MORE_DATA) && (currLcn < this.Volume.PartInfo.ClusterCount));
 
             if (clusterCount > 0)
             {
@@ -500,13 +500,13 @@ namespace Little_Disk_Defrag
             ulong x = 0;
             ulong y = 0;
 
-            if (clusterStart > this.Volume.VolInfo.ClusterCount && clusterEnd > this.Volume.VolInfo.ClusterCount)
+            if (clusterStart > this.Volume.PartInfo.ClusterCount && clusterEnd > this.Volume.PartInfo.ClusterCount)
                 return;
-            if (clusterStart > this.Volume.VolInfo.ClusterCount) 
+            if (clusterStart > this.Volume.PartInfo.ClusterCount) 
                 return;
 
-            if (clusterEnd > this.Volume.VolInfo.ClusterCount)
-                clusterEnd = this.Volume.VolInfo.ClusterCount;
+            if (clusterEnd > this.Volume.PartInfo.ClusterCount)
+                clusterEnd = this.Volume.PartInfo.ClusterCount;
 
             while (y / (ulong)this.BlockSize * this.clustersPerLine <= clusterStart)
                 y += (ulong)this.BlockSize;
@@ -548,14 +548,14 @@ namespace Little_Disk_Defrag
             int x2 = 0;
             int y2 = 0;
 
-            if (this.Volume.VolInfo.ClusterCount == 0 || clusterEnd == 0) 
+            if (this.Volume.PartInfo.ClusterCount == 0 || clusterEnd == 0) 
                 return;
 
-            if (clusterStart > this.Volume.VolInfo.ClusterCount) 
+            if (clusterStart > this.Volume.PartInfo.ClusterCount) 
                 return;
 
-            if (clusterEnd > this.Volume.VolInfo.ClusterCount) 
-                clusterEnd = this.Volume.VolInfo.ClusterCount;
+            if (clusterEnd > this.Volume.PartInfo.ClusterCount)
+                clusterEnd = this.Volume.PartInfo.ClusterCount;
 
             if (this.BlockSize == 1)
             {
@@ -609,14 +609,14 @@ namespace Little_Disk_Defrag
 
             if (this.BlockSize < 5) 
                 return;
-            if (this.Volume.VolInfo.ClusterCount == 0 || clusterEnd == 0) 
+            if (this.Volume.PartInfo.ClusterCount == 0 || clusterEnd == 0) 
                 return;
-            if (clusterStart > this.Volume.VolInfo.ClusterCount && clusterEnd > this.Volume.VolInfo.ClusterCount) 
+            if (clusterStart > this.Volume.PartInfo.ClusterCount && clusterEnd > this.Volume.PartInfo.ClusterCount) 
                 return;
-            if (clusterStart > this.Volume.VolInfo.ClusterCount) 
+            if (clusterStart > this.Volume.PartInfo.ClusterCount) 
                 return;
-            if (clusterEnd > this.Volume.VolInfo.ClusterCount) 
-                clusterEnd = this.Volume.VolInfo.ClusterCount;
+            if (clusterEnd > this.Volume.PartInfo.ClusterCount)
+                clusterEnd = this.Volume.PartInfo.ClusterCount;
 
             if (this.BlockSize == 1)
             {

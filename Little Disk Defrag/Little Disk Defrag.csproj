@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -62,6 +63,10 @@
       <DependentUpon>Drawing.xaml</DependentUpon>
     </Compile>
     <Compile Include="Helpers\Draw.cs" />
+    <Compile Include="Helpers\MFTEntry.cs" />
+    <Compile Include="Helpers\Partitions\FAT.cs" />
+    <Compile Include="Helpers\Partitions\NTFS.cs" />
+    <Compile Include="Helpers\Partitions\PartInfo.cs" />
     <Compile Include="Misc\Permissions.cs" />
     <Compile Include="Report.xaml.cs">
       <DependentUpon>Report.xaml</DependentUpon>
@@ -82,7 +87,6 @@
     <Compile Include="Helpers\FileInfo.cs" />
     <Compile Include="Misc\Utils.cs" />
     <Compile Include="Misc\PInvoke.cs" />
-    <Compile Include="Helpers\VolumeInfo.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

@@ -216,7 +216,7 @@ namespace Little_Disk_Defrag
 
             foreach (DriveInfo di in DriveInfo.GetDrives())
             {
-                if (di.IsReady && di.DriveType == DriveType.Fixed && di.AvailableFreeSpace > 0)
+                //if (di.IsReady && di.DriveType == DriveType.Fixed && di.AvailableFreeSpace > 0)
                     this.Drives.Add(di.ToString().Substring(0,2));
             }
 

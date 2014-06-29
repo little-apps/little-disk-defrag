@@ -16,7 +16,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Little_Disk_Defrag.Helpers.Partitions;
 using Little_Disk_Defrag.Misc;
+using Microsoft.Win32.SafeHandles;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -30,19 +32,36 @@ namespace Little_Disk_Defrag.Helpers
 {
     public class DriveVolume : IDisposable
     {
-        public IntPtr Handle;
+        public SafeFileHandle Handle;
         private byte[] BitmapDetail;
         private string _rootPath;
-        private PInvoke.DISK_GEOMETRY Geometry;
-        private readonly VolumeInfo _volInfo;
+        private PInvoke.DISK_GEOMETRY _geometry;
         private readonly List<string> _directoryList;
         private readonly List<FileInfo> _fileList;
+        private System.IO.DriveInfo _driveInfo;
+        private PartInfo _partInfo;
+        private System.IO.FileStream _driveStream;
 
-        public VolumeInfo VolInfo
+        public PartInfo PartInfo
         {
-            get { return this._volInfo; }
+            get { return this._partInfo; }
         }
 
+        public System.IO.FileStream DriveStream
+        {
+            get { return this._driveStream; }
+        }
+
+        public PInvoke.DISK_GEOMETRY Geometry
+        {
+            get { return this._geometry; }
+            set { this._geometry = value; }
+        }
+
+        /// <summary>
+        /// Location of volume (with leading slash)
+        /// </summary>
+        /// <example>C:\</example>
         public string RootPath
         {
             get { return this._rootPath; }
@@ -70,15 +89,16 @@ namespace Little_Disk_Defrag.Helpers
 
         public bool BitmapLoaded
         {
-            get
-            {
-                return (!((this.BitmapDetail == null) || this.BitmapDetail.Length == 0));
-            }
+            get { return (!((this.BitmapDetail == null) || this.BitmapDetail.Length == 0)); }
+        }
+
+        public System.IO.DriveInfo DriveInfo
+        {
+            get { return this._driveInfo; }
         }
 
         public DriveVolume()
         {
-            this._volInfo = new VolumeInfo();
             this._directoryList = new List<string>();
             this._fileList = new List<FileInfo>();
             
@@ -98,8 +118,8 @@ namespace Little_Disk_Defrag.Helpers
             {
                 if (disposing)
                 {
-                    if (Handle.ToInt32() != -1)
-                        PInvoke.CloseHandle(Handle);
+                    if (!Handle.IsClosed && !Handle.IsInvalid)
+                        Handle.Close();
                 }
 
                 disposed = true;
@@ -129,7 +149,7 @@ namespace Little_Disk_Defrag.Helpers
                 IntPtr.Zero                                         // template
             );
 
-            if (this.Handle.ToInt32() == -1)
+            if (this.Handle.IsClosed || this.Handle.IsInvalid)
             {
                 Debug.WriteLine("Unable to open volume. Error #{0} occurred", Marshal.GetLastWin32Error());
 
@@ -137,99 +157,20 @@ namespace Little_Disk_Defrag.Helpers
             }
             else
             {
-                StringBuilder VolName = new StringBuilder(64);
-                uint VolSN;
-                uint VolMaxFileLen;
-                PInvoke.FileSystemFeature FSFlags;
-                StringBuilder FSName = new StringBuilder(64);
+                // Get DriveInfo
+                this._driveInfo = new System.IO.DriveInfo(this._rootPath);
+                this._driveStream = new System.IO.FileStream(this.Handle, System.IO.FileAccess.Read);
 
-                if (PInvoke.GetVolumeInformation(RootPath, VolName, VolName.Capacity, out VolSN, out VolMaxFileLen, out FSFlags, FSName, FSName.Capacity))
-                {
-                    VolInfo.FileSystem = FSName.ToString();
-                    VolInfo.MaxNameLen = VolMaxFileLen;
-                    VolInfo.Name       = VolName.ToString();
-                    VolInfo.Serial     = string.Format("{0:X}-{1:X}", (VolSN & 0xffff0000) >> 16, VolSN & 0x0000ffff);
-                }
-                else
-                {
-                    VolInfo.FileSystem = "(Unknown)";
-                    VolInfo.MaxNameLen = 255;
-                    VolInfo.Name       = "(Unknown)";
-                    VolInfo.Serial     = "(Unknown)";
-                }
+                // Detect filesystem
+                //if (this._driveInfo.DriveFormat.ToUpper() == "NTFS")
+                //    this._partInfo = new NTFS(this);
+                //else
+                    this._partInfo = new FAT(this);
 
                 retVal = true;
             }
 
             return retVal;
-        }
-
-        /// <summary>
-        /// Retrieves drive geometry
-        /// </summary>
-        /// <returns></returns>
-        public bool ObtainInfo() 
-        {
-            bool Result;
-            uint BytesGot;
-            UInt64 nan;
-
-            int GeometrySize = Marshal.SizeOf(typeof(PInvoke.DISK_GEOMETRY));
-            IntPtr GeometryPtr = Marshal.AllocHGlobal(GeometrySize);
-
-            BytesGot = 0;
-            Result = PInvoke.DeviceIoControl
-            (
-                Handle,
-                PInvoke.FSConstants.IOCTL_DISK_GET_DRIVE_GEOMETRY,
-                IntPtr.Zero,
-                0,
-                GeometryPtr,
-                (uint)GeometrySize,
-                ref BytesGot,
-                IntPtr.Zero
-            );
-
-            // Call failed? Aww :(
-            if (!Result)
-                return false;
-
-            this.Geometry = (PInvoke.DISK_GEOMETRY)Marshal.PtrToStructure(GeometryPtr, typeof(PInvoke.DISK_GEOMETRY));
-
-            uint SectorsPerCluster;
-            uint BytesPerSector;
-            uint FreeClusters;
-            uint TotalClusters;
-
-            Result = PInvoke.GetDiskFreeSpace
-            (
-                RootPath,
-                out SectorsPerCluster,
-                out BytesPerSector,
-                out FreeClusters,
-                out TotalClusters
-            );
-
-            // Failed? Weird.
-            if (!Result)
-                return (false);
-
-            VolInfo.ClusterSize = SectorsPerCluster * BytesPerSector;
-
-            ulong totalBytes, freeBytes;
-
-            Result = PInvoke.GetDiskFreeSpaceEx
-            (
-                RootPath,
-                out nan,
-                out totalBytes,
-                out freeBytes
-            );
-
-            this.VolInfo.TotalBytes = totalBytes;
-            this.VolInfo.FreeBytes = freeBytes;
-
-            return true;
         }
 
         /// <summary>
@@ -296,7 +237,7 @@ namespace Little_Disk_Defrag.Helpers
             Bitmap = new PInvoke.VOLUME_BITMAP_BUFFER(pDest, true);
             BitmapSize = (uint)Marshal.SizeOf(typeof(PInvoke.VOLUME_BITMAP_BUFFER)) + ((uint)Bitmap.BitmapSize.QuadPart / 8) + 1;
 
-            this.VolInfo.ClusterCount = (ulong)Bitmap.BitmapSize.QuadPart;
+            this.PartInfo.ClusterCount = (ulong)Bitmap.BitmapSize.QuadPart;
 
             this.BitmapDetail = Bitmap.Buffer;
 
@@ -326,7 +267,7 @@ namespace Little_Disk_Defrag.Helpers
             Directories.Clear();
             Directories.Add(RootPath);
 
-            BuildDBInfo Info = new BuildDBInfo(defrag, this, (this.VolInfo.TotalBytes - this.VolInfo.FreeBytes) / (UInt64)this.VolInfo.ClusterSize);
+            BuildDBInfo Info = new BuildDBInfo(defrag, this, (this.PartInfo.TotalBytes - this.PartInfo.FreeBytes) / (UInt64)this.PartInfo.ClusterSize);
 
             ScanDirectory (RootPath, BuildDBCallback, Info);
 
@@ -339,7 +280,7 @@ namespace Little_Disk_Defrag.Helpers
             return (true);
         }
 
-        bool BuildDBCallback(ref FileInfo Info, ref IntPtr FileHandle, ref BuildDBInfo DBInfo)
+        bool BuildDBCallback(ref FileInfo Info, ref SafeFileHandle FileHandle, ref BuildDBInfo DBInfo)
         {
             DriveVolume Vol = DBInfo.Volume;
 
@@ -354,7 +295,7 @@ namespace Little_Disk_Defrag.Helpers
             return (true);
         }
 
-        public delegate bool ScanCallback(ref FileInfo Info, ref IntPtr FileHandle, ref BuildDBInfo DBInfo);
+        public delegate bool ScanCallback(ref FileInfo Info, ref SafeFileHandle FileHandle, ref BuildDBInfo DBInfo);
 
         public bool ScanDirectory(string DirPrefix, ScanCallback Callback, BuildDBInfo UserData)
         {
@@ -377,7 +318,7 @@ namespace Little_Disk_Defrag.Helpers
                 UInt64 FileSize = ((FindData.nFileSizeHigh << 32) | FindData.nFileSizeLow);
 
                 FileInfo Info = new FileInfo(FindData.cFileName, DirIndice, FileSize, FindData.dwFileAttributes);
-                IntPtr Handle = PInvoke.INVALID_HANDLE_VALUE;
+                SafeFileHandle Handle = null;
                 bool CallbackResult;
 
                 // DonLL't ever include '.L' and '..'
@@ -387,7 +328,7 @@ namespace Little_Disk_Defrag.Helpers
                 //Info.FullName = DirPrefix + Info.Name;
 
                 Info.Clusters = 0;
-                if (GetClusterInfo(Info, Handle))
+                if (GetClusterInfo(Info, ref Handle))
                 {
                     UInt64 TotalClusters = 0;
 
@@ -409,8 +350,8 @@ namespace Little_Disk_Defrag.Helpers
                 // Run the user-defined callback function
                 CallbackResult = Callback(ref Info, ref Handle, ref UserData);
 
-                if (Handle != PInvoke.INVALID_HANDLE_VALUE)
-                    PInvoke.CloseHandle (Handle);
+                if (!Handle.IsInvalid && !Handle.IsClosed)
+                    Handle.Close();
 
                 if (!CallbackResult)
                     break;
@@ -452,26 +393,28 @@ namespace Little_Disk_Defrag.Helpers
             return (true);
         }
 
-        private bool GetClusterInfo (FileInfo Info, IntPtr HandleResult) {
+        private bool GetClusterInfo(FileInfo Info, ref SafeFileHandle Handle)
+        {
             Info.Fragments.Clear();
 
             bool Result;
-            IntPtr Handle;
             string FullName = this.GetDBDir(Info.DirIndice) + Info.Name;
             PInvoke.BY_HANDLE_FILE_INFORMATION FileInfo;
 
-            Handle = PInvoke.CreateFile
-            (
-                FullName,
-                PInvoke.GENERIC_READ,
-                PInvoke.FILE_SHARE_READ | PInvoke.FILE_SHARE_WRITE,
-                IntPtr.Zero,
-                PInvoke.OPEN_EXISTING,
-                (Info.Attributes.Directory) ? PInvoke.FILE_FLAG_BACKUP_SEMANTICS : 0,
-                IntPtr.Zero
-            );
+            if ((Handle == null) || Handle.IsClosed || Handle.IsInvalid)
+            {
+                Handle = PInvoke.CreateFile(
+                    FullName,
+                    PInvoke.GENERIC_READ,
+                    PInvoke.FILE_SHARE_READ | PInvoke.FILE_SHARE_WRITE,
+                    IntPtr.Zero,
+                    PInvoke.OPEN_EXISTING,
+                    (Info.Attributes.Directory) ? PInvoke.FILE_FLAG_BACKUP_SEMANTICS : 0,
+                    IntPtr.Zero
+                );
+            }
 
-            if (Handle == PInvoke.INVALID_HANDLE_VALUE)
+            if (Handle.IsInvalid || Handle.IsClosed)
             {
                 Debug.WriteLine("Error #{0} occurred trying to open file '{1}'", Marshal.GetLastWin32Error(), FullName);
 
@@ -486,7 +429,7 @@ namespace Little_Disk_Defrag.Helpers
                 Info.Attributes.AccessDenied = true;
                 Debug.WriteLine("GetFileInformationByHandle ('{0}') failed\n", FullName);
 
-                PInvoke.CloseHandle(Handle);
+                Handle.Close();
                 return false;
             }
 
@@ -544,7 +487,7 @@ namespace Little_Disk_Defrag.Helpers
                         Info.Attributes.AccessDenied = true;
                         Info.Attributes.Process = false;
                         Info.Fragments.Clear();
-                        PInvoke.CloseHandle(Handle);
+                        Handle.Close();
                         Marshal.FreeHGlobal(pDest);
 
                         return false;
@@ -577,7 +520,7 @@ namespace Little_Disk_Defrag.Helpers
             }
 
             Marshal.FreeHGlobal(pDest);
-            HandleResult = Handle;
+
             return true;
         }
 
@@ -589,7 +532,7 @@ namespace Little_Disk_Defrag.Helpers
 
             LCNResult = 0;
 
-            for (i = StartLCN; i < this.VolInfo.ClusterCount; i++)
+            for (i = StartLCN; i < this.PartInfo.ClusterCount; i++)
             {
                 bool Found = true;
 
@@ -634,7 +577,7 @@ namespace Little_Disk_Defrag.Helpers
         {
             bool ReturnVal = false;
             FileInfo Info;
-            IntPtr FileHandle;
+            SafeFileHandle FileHandle;
             string FullName;
             PInvoke.MoveFileData MoveData = new PInvoke.MoveFileData();
             ulong CurrentLCN;
@@ -670,7 +613,7 @@ namespace Little_Disk_Defrag.Helpers
                 IntPtr.Zero
             );
 
-            if (FileHandle == PInvoke.INVALID_HANDLE_VALUE)
+            if (FileHandle.IsClosed || FileHandle.IsInvalid)
             {
                 Debug.WriteLine("Error #{0} occurred trying to get file handle for '{1}'", Marshal.GetLastWin32Error(), FullName);
 
@@ -693,7 +636,7 @@ namespace Little_Disk_Defrag.Helpers
                         MoveData.StartingLCN.QuadPart = CurrentLCN;
                         MoveData.StartingVCN.QuadPart = CurrentVCN;
 
-                        MoveData.hFile = FileHandle;
+                        MoveData.hFile = FileHandle.DangerousGetHandle();
 
                         GCHandle handle = GCHandle.Alloc(MoveData, GCHandleType.Pinned);
                         IntPtr pInput = handle.AddrOfPinnedObject();
@@ -754,11 +697,10 @@ namespace Little_Disk_Defrag.Helpers
                 finally
                 {
                     // Update file info either way
-                    PInvoke.CloseHandle (FileHandle);
-                    FileHandle = IntPtr.Zero;
                     FileInfo fileInfo = Files[FileIndice];
-                    GetClusterInfo (fileInfo, FileHandle);
-                    PInvoke.CloseHandle(FileHandle);
+                    GetClusterInfo(fileInfo, ref FileHandle);
+
+                    FileHandle.Close();
                 }
 
             }

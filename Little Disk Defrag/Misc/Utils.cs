@@ -16,11 +16,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Microsoft.Win32.SafeHandles;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -36,6 +39,58 @@ namespace Little_Disk_Defrag.Misc
 
         internal static ulong Max(ulong a, ulong b) {
             return (a > b ? a : b);
+        }
+
+        internal static void CloseHandle(IntPtr handle)
+        {
+            if (handle.ToInt32() == -1 || handle == IntPtr.Zero)
+                return;
+
+            try
+            {
+                PInvoke.CloseHandle(handle);
+            }
+            catch (SEHException ex)
+            {
+                Debug.WriteLine("The following error occurred: {0}\nIs the handle trying to be closed twice?", ex.Message);
+            }
+            
+            handle = IntPtr.Zero;
+        }
+
+        internal static long? FileSeek(SafeFileHandle handle, long offset, SeekOrigin origin)
+        {
+            uint moveMethod = 0;
+
+            switch (origin)
+            {
+                case SeekOrigin.Begin:
+                    moveMethod = 0;
+                    break;
+
+                case SeekOrigin.Current:
+                    moveMethod = 1;
+                    break;
+
+                case SeekOrigin.End:
+                    moveMethod = 2;
+                    break;
+            }
+
+            int lo = (int)(offset & 0xffffffff);
+            int hi = (int)(offset >> 32);
+
+            lo = PInvoke.SetFilePointer(handle, lo, out hi, moveMethod);
+
+            if (lo == -1)
+            {
+                if (Marshal.GetLastWin32Error() != 0)
+                {
+                    return null;
+                }
+            }
+
+            return (((long)hi << 32) | (uint)lo);
         }
 
         internal static Color HexToColor(uint argb)

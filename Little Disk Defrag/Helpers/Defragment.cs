@@ -280,11 +280,30 @@ namespace Little_Disk_Defrag.Helpers
                 }
 
                 this.StatusString = "Obtaining volume geometry";
-                if (!Volume.ObtainInfo())
+                if (!this.Volume.PartInfo.GetPartitionInfo())
                 {
                     this.StatusString = "Could not obtain volume " + DriveName + " geometry";
                     Error = true;
+
                     this.Close();
+
+                    return;
+                }
+
+                if (PleaseStop)
+                {
+                    this.Close();
+                    return;
+                }
+
+                this.StatusString = "Obtaining partition information";
+                if (!this.Volume.PartInfo.GetPartitionDetails())
+                {
+                    this.StatusString = "Could not obtain partition " + DriveName + " information";
+                    Error = true;
+
+                    this.Close();
+
                     return;
                 }
 
@@ -334,12 +353,12 @@ namespace Little_Disk_Defrag.Helpers
                     uint j;
 
                     Report.RootPath = Volume.RootPath;
-                    Report.Label = Volume.VolInfo.Name;
-                    Report.Serial = Volume.VolInfo.Serial;
-                    Report.FileSystem = Volume.VolInfo.FileSystem;
-                    Report.FreeBytes = Volume.VolInfo.FreeBytes;
-                    Report.ClusterCount = Volume.VolInfo.ClusterCount;
-                    Report.ClusterSize = Volume.VolInfo.ClusterSize;
+                    Report.Label = Volume.PartInfo.Name;
+                    Report.Serial = Volume.PartInfo.Serial;
+                    Report.FileSystem = Volume.PartInfo.FileSystem;
+                    Report.FreeBytes = Volume.PartInfo.FreeBytes;
+                    Report.ClusterCount = Volume.PartInfo.ClusterCount;
+                    Report.ClusterSize = Volume.PartInfo.ClusterSize;
 
                     Report.FraggedFiles.Clear();
                     Report.UnfraggedFiles.Clear();
@@ -347,7 +366,7 @@ namespace Little_Disk_Defrag.Helpers
 
                     Report.FilesCount = (ulong)Volume.DBFileCount - (ulong)Volume.DBDirCount;
                     Report.DirsCount = (ulong)Volume.DBDirCount;
-                    Report.DiskSizeBytes = Volume.VolInfo.TotalBytes;
+                    Report.DiskSizeBytes = Volume.PartInfo.TotalBytes;
 
                     Report.FilesSizeClusters = 0;
                     Report.FilesSlackBytes = 0;
@@ -381,7 +400,7 @@ namespace Little_Disk_Defrag.Helpers
                         StatusPercent = ((double)j / (double)Report.FilesCount) * 100.0f;
                     }
 
-                    Report.FilesSizeOnDisk = Report.FilesSizeClusters * (UInt64)Volume.VolInfo.ClusterSize;
+                    Report.FilesSizeOnDisk = Report.FilesSizeClusters * (UInt64)Volume.PartInfo.ClusterSize;
                     Report.FilesSlackBytes = Report.FilesSizeOnDisk - Report.FilesSizeBytes;
                     Report.PercentFragged = 100.0f * ((double)Report.FraggedFiles.Count / (double)Report.FilesCount);
 
