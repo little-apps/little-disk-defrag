@@ -136,7 +136,7 @@ namespace Little_Disk_Defrag
 
             this.Content = this.draw;
 
-            this.timer = new DispatcherTimer() { Interval = new TimeSpan(0, 0, 0, 0, 750), IsEnabled = true };
+            this.timer = new DispatcherTimer() { Interval = new TimeSpan(0, 0, 0, 0, 250), IsEnabled = true };
             this.timer.Tick += RefreshDrawing;
         }
 

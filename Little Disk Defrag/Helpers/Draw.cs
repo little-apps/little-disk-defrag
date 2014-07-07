@@ -27,6 +27,8 @@ namespace Little_Disk_Defrag.Helpers
             public Pen Pen;
         }
 
+        private object _lockObj = new object();
+
         private List<MyRect> rects = new List<MyRect>();
         private List<MyLine> lines = new List<MyLine>();
 
@@ -37,11 +39,15 @@ namespace Little_Disk_Defrag.Helpers
 
         public void Clear()
         {
-            if (this.rects.Count > 0)
-                this.rects.Clear();
+            lock (this._lockObj)
+            {
+                if (this.rects.Count > 0)
+                    this.rects.Clear();
 
-            if (this.lines.Count > 0)
-                this.lines.Clear();
+                if (this.lines.Count > 0)
+                    this.lines.Clear();
+            }
+            
         }
 
         protected override void OnRender(DrawingContext dc)
@@ -53,15 +59,17 @@ namespace Little_Disk_Defrag.Helpers
             }
 
             // This was the fastest way to draw multiple objects on WPF
-
-            foreach (MyRect mRect in rects)
+            lock (this._lockObj)
             {
-                dc.DrawRectangle(mRect.Brush, null, mRect.Rect);
-            }
+                foreach (MyRect mRect in rects)
+                {
+                    dc.DrawRectangle(mRect.Brush, null, mRect.Rect);
+                }
 
-            foreach (MyLine mLine in lines)
-            {
-                dc.DrawLine(mLine.Pen, mLine.StartPoint, mLine.EndPoint);
+                foreach (MyLine mLine in lines)
+                {
+                    dc.DrawLine(mLine.Pen, mLine.StartPoint, mLine.EndPoint);
+                }
             }
 
             base.OnRender(dc);
@@ -69,20 +77,26 @@ namespace Little_Disk_Defrag.Helpers
 
         public void DrawBlock(double left, double top, double width, double height, uint color)
         {
-            Rect rect = new Rect(left, top, width, height);
-            System.Windows.Media.Brush brush = new SolidColorBrush(Utils.HexToColor(color));
+            lock (this._lockObj)
+            {
+                Rect rect = new Rect(left, top, width, height);
+                System.Windows.Media.Brush brush = new SolidColorBrush(Utils.HexToColor(color));
 
-            rects.Add(new MyRect() { Rect = rect, Brush = brush });
+                rects.Add(new MyRect() { Rect = rect, Brush = brush });
+            }
         }
 
         public void DrawLine(double startX, double startY, double endX, double endY, uint color)
         {
-            Point startPoint = new Point(startX, startY);
-            Point endPoint = new Point(endX, endY);
-            Brush brush = new SolidColorBrush(Utils.HexToColor(color));
-            Pen pen = new Pen(brush, 1);
+            lock (this._lockObj)
+            {
+                Point startPoint = new Point(startX, startY);
+                Point endPoint = new Point(endX, endY);
+                Brush brush = new SolidColorBrush(Utils.HexToColor(color));
+                Pen pen = new Pen(brush, 1);
 
-            this.lines.Add(new MyLine() { Pen = pen, StartPoint = startPoint, EndPoint = endPoint });
+                this.lines.Add(new MyLine() { Pen = pen, StartPoint = startPoint, EndPoint = endPoint });
+            }
         }
     }
 }
