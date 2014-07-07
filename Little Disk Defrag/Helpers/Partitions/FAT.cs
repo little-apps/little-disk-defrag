@@ -51,6 +51,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
         public override bool GetPartitionDetails()
         {
             uint BytesRead;
+            ulong FATSize;
             bool result;
 
             IntPtr BootSectorPtr = Marshal.AllocHGlobal(512);
@@ -158,6 +159,48 @@ namespace Little_Disk_Defrag.Helpers.Partitions
                 Debug.WriteLine("  VolLab: {0}", BootSector.FAT1632Info.FAT32_VolumeName);
                 Debug.WriteLine("  FilSysType: {0}", BootSector.FAT1632Info.FAT32_FSType);
 	        }
+
+            switch (this.Type)
+            {
+                case FATTypes.FAT12:
+                    {
+                        FATSize = this.ClusterCount + 1; 
+                        break;
+                    }
+
+                case FATTypes.FAT16:
+                    {
+                        FATSize = (this.ClusterCount + 1) * 2; 
+                        break;
+                    }
+
+                case FATTypes.FAT32:
+                    {
+                        FATSize = (this.ClusterCount + 1) * 4; 
+                        break;
+                    }
+                default:
+                    {
+                        FATSize = 0;
+                        break;
+                    }
+            }
+
+            if (FATSize % this.BytesPerSector > 0)
+                FATSize = (ulong)(FATSize + this.BytesPerSector - FATSize % this.BytesPerSector);
+
+            PInvoke.LARGE_INTEGER Trans = new PInvoke.LARGE_INTEGER() { QuadPart = BootSector.ReservedSectors * this.BytesPerSector };
+
+            IntPtr FATDataPtr = Marshal.AllocHGlobal((int)FATSize);
+
+            System.Threading.NativeOverlapped nativeOverlapped = new System.Threading.NativeOverlapped();
+            nativeOverlapped.EventHandle = IntPtr.Zero;
+            nativeOverlapped.OffsetLow = (int)Trans.LowPart;
+            nativeOverlapped.OffsetHigh = Trans.HighPart;
+
+            PInvoke.ReadFile(this.Volume.Handle, FATDataPtr, (uint)FATSize, out BytesRead, ref nativeOverlapped);
+
+            PInvoke.FATData FatData = new PInvoke.FATData(FATDataPtr, this.Type, FATSize);
 
             return true;
         }

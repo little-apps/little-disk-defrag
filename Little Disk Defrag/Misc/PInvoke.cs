@@ -474,6 +474,96 @@ namespace Little_Disk_Defrag.Misc
             }
         }
 
+        internal struct FATData
+        {
+            public byte[] FAT12;
+            public ushort[] FAT16;
+            public uint[] FAT32;
+
+            public FATData(IntPtr ptr, Helpers.Partitions.FAT.FATTypes type, ulong size)
+            {
+                ulong i;
+
+                this.FAT12 = new byte[1];
+                this.FAT16 = new ushort[1];
+                this.FAT32 = new uint[1];
+
+                if (type == Helpers.Partitions.FAT.FATTypes.FAT12)
+                {
+                    List<byte> arr = new List<byte>();
+
+                    for (i = 0; i < size; i += 1)
+                    {
+                        arr.Add(Marshal.ReadByte(ptr));
+
+                        ptr = IntPtr.Add(ptr, 1);
+                    }
+
+                    this.FAT12 = arr.ToArray();
+                }
+                else if (type == Helpers.Partitions.FAT.FATTypes.FAT16)
+                {
+                    List<ushort> arr = new List<ushort>();
+
+                    for (i = 0; i < size; i += 2)
+                    {
+                        arr.Add((ushort)Marshal.PtrToStructure(ptr, typeof(ushort)));
+
+                        ptr = IntPtr.Add(ptr, 2);
+                    }
+
+                    this.FAT16 = arr.ToArray();
+                }
+                else if (type == Helpers.Partitions.FAT.FATTypes.FAT32)
+                {
+                    List<uint> arr = new List<uint>();
+
+                    for (i = 0; i < size; i += 4)
+                    {
+                        arr.Add((uint)Marshal.PtrToStructure(ptr, typeof(uint)));
+
+                        ptr = IntPtr.Add(ptr, 4);
+                    }
+
+                    this.FAT32 = arr.ToArray();
+                }
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        internal struct FatDirStruct
+        {
+            [MarshalAs(UnmanagedType.LPStr, SizeConst=11)]
+            public string  DIR_Name;           // 0   File name, 8 + 3.
+            public byte DIR_Attr;               // 11  File attributes.
+            public byte DIR_NTRes;              // 12  Reserved.
+            public byte DIR_CrtTimeTenth;       // 13  Creation time, tenths of a second, 0...199.
+            public ushort DIR_CrtTime;            // 14  Creation time.
+            public ushort DIR_CrtDate;            // 16  Creation date.
+            public ushort DIR_LstAccDate;         // 18  Last access date.
+            public ushort DIR_FstClusHI;          // 20  First cluster number, high word.
+            public ushort DIR_WrtTime;            // 22  Last write time.
+            public ushort DIR_WrtDate;            // 24  Last write date.
+            public ushort DIR_FstClusLO;          // 26  First cluster number, low word.
+            public uint DIR_FileSize;           // 28  File size in bytes.
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        internal struct FatLongNameDirStruct {
+            public byte LDIR_Ord;                // 0   Sequence number
+            [MarshalAs(UnmanagedType.LPWStr, SizeConst=5)]
+            public string LDIR_Name1;           // 1   Characters 1-5 in name
+            public byte LDIR_Attr;               // 11  Attribute, must be ATTR_LONG_NAME
+            public byte LDIR_Type;               // 12  Always zero
+            public byte LDIR_Chksum;             // 13  Checksum
+            [MarshalAs(UnmanagedType.LPWStr, SizeConst=6)]
+            public string LDIR_Name2;           // 14  Characters 6-11
+            [MarshalAs(UnmanagedType.LPStr, SizeConst=2)]
+            public string LDIR_FstClusLO;       // 26  Always zero
+            [MarshalAs(UnmanagedType.LPWStr, SizeConst=2)]
+            public string LDIR_Name3;           // 28  Characters 12-13
+        }
+
         internal struct Extent
         {
             public LARGE_INTEGER NextVcn;
