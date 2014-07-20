@@ -204,5 +204,69 @@ namespace Little_Disk_Defrag.Helpers.Partitions
 
             return true;
         }
+
+        private byte[] LoadDir(PInvoke.FATData fatData, ulong startCluster, ref ulong outLen)
+        {
+            ulong bufLen = 0;
+            ulong i;
+            ulong cluster = startCluster;
+
+
+            outLen = 0;
+
+            if (startCluster == 0)
+                return new byte[0];
+
+            for (i = 0; i < this.ClusterCount + 1; i++)
+            {
+                // Have we reached the end of the clusters?
+                if (((this.Type == FATTypes.FAT12) && (cluster >= 0xFF8)) ||
+                    ((this.Type == FATTypes.FAT16) && (cluster >= 0xFFF8)) ||
+                    ((this.Type == FATTypes.FAT32) && (cluster >= 0xFFFFFF8)))
+                    break;
+
+                if ((cluster < 2) || (cluster > this.ClusterCount + 1))
+                    return new byte[0];
+
+                bufLen = bufLen + this.SectorsPerCluster * this.BytesPerSector;
+
+                switch (this.Type)
+                {
+                    case FATTypes.FAT12:
+                        {
+                            if ((cluster & 1) == 1)
+                                cluster = (ulong)fatData.FAT12[cluster] >> 4;
+                            else
+                                cluster = (ulong)fatData.FAT12[cluster] & 0xFFF;
+
+                            break;
+                        }
+                    case FATTypes.FAT16:
+                        {
+                            cluster = (ulong)fatData.FAT16[cluster];
+                            break;
+                        }
+                    case FATTypes.FAT32:
+                        {
+                            cluster = (ulong)fatData.FAT32[cluster] & 0xFFFFFFF;
+                            break;
+                        }
+                }
+            }
+
+            if (i >= this.ClusterCount + 1)
+            {
+                Debug.WriteLine("Reached end of cluster count. This could mean the disk is corrupt.");
+                return new byte[0];
+            }
+
+            if (bufLen > uint.MaxValue)
+            {
+                Debug.WriteLine("The directory is {0} bytes, which is too big", new object[] { bufLen });
+                return new byte[0];
+            }
+
+            return new byte[0];
+        }
     }
 }

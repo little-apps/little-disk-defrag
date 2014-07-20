@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:this="clr-namespace:Little_Disk_Defrag"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
-        Title="{Binding WindowTitle}" MinHeight="374.455" MinWidth="454.127" SizeChanged="Window_SizeChanged">
+        Title="{Binding WindowTitle}" MinHeight="374.455" MinWidth="454.127" SizeChanged="Window_SizeChanged" Icon="Resources/Little Disk Defrag.ico">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>

@@ -59,5 +59,15 @@ namespace Little_Disk_Defrag.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Little_Disk_Defrag {
+            get {
+                object obj = ResourceManager.GetObject("Little_Disk_Defrag", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
     }
 }
