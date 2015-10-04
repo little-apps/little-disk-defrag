@@ -167,10 +167,12 @@ namespace Little_Disk_Defrag.Helpers.Partitions
 
             IntPtr FATDataPtr = Marshal.AllocHGlobal((int)FATSize);
 
-            NativeOverlapped nativeOverlapped = new NativeOverlapped();
-            nativeOverlapped.EventHandle = IntPtr.Zero;
-            nativeOverlapped.OffsetLow = (int)Trans.LowPart;
-            nativeOverlapped.OffsetHigh = Trans.HighPart;
+            NativeOverlapped nativeOverlapped = new NativeOverlapped
+            {
+                EventHandle = IntPtr.Zero,
+                OffsetLow = (int) Trans.LowPart,
+                OffsetHigh = Trans.HighPart
+            };
 
             PInvoke.ReadFile(Volume.Handle, FATDataPtr, (uint)FATSize, out BytesRead, ref nativeOverlapped);
 
