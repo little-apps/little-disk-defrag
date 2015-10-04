@@ -1,8 +1,5 @@
 ﻿using Little_Disk_Defrag.Misc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Windows;
 

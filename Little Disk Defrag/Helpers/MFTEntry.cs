@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Little_Disk_Defrag.Helpers
+﻿namespace Little_Disk_Defrag.Helpers
 {
     public class MFTEntry
     {
