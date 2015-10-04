@@ -66,23 +66,12 @@ namespace Little_Disk_Defrag
 
         private DispatcherTimer _resizeTimer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 0, 1500), IsEnabled = false };
 
-        public List<string> Drives
-        {
-            get { return _drives; }
-        }
-        public List<string> Actions
-        {
-            get { return _actions; }
-        }
-        public List<string> Priorities
-        {
-            get { return _priorities; }
-        }
+        public List<string> Drives => _drives;
 
-        public bool IsDefragmentActive
-        {
-            get { return ((_thread != null) && _thread.IsAlive); }
-        }
+        public List<string> Actions => _actions;
+        public List<string> Priorities => _priorities;
+
+        public bool IsDefragmentActive => ((_thread != null) && _thread.IsAlive);
 
         public string SelectedDrive
         {
@@ -145,10 +134,7 @@ namespace Little_Disk_Defrag
             }
         }
 
-        public string ProgressBarText
-        {
-            get { return Math.Round(_progressBarValue,2) + "%"; }
-        }
+        public string ProgressBarText => Math.Round(_progressBarValue,2) + "%";
 
         public string StatusText
         {
@@ -170,13 +156,7 @@ namespace Little_Disk_Defrag
             }
         }
 
-        public bool ControlsEnabled
-        {
-            get
-            {
-                return (!(IsDefragmentActive && !_defragger.IsDoneYet && !_defragger.HasError));
-            }
-        }
+        public bool ControlsEnabled => (!(IsDefragmentActive && !_defragger.IsDoneYet && !_defragger.HasError));
 
         public string WindowTitle
         {

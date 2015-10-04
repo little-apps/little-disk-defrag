@@ -45,23 +45,12 @@ namespace Little_Disk_Defrag.Helpers
         public double PercentFragged;
         public double PercentSlack;
 
-        public double AverageFragments
-        {
-            get { return FilesFragments / (double)FilesCount; }
-        }
+        public double AverageFragments => FilesFragments / (double)FilesCount;
 
-        public List<uint> FraggedFiles
-        {
-            get { return _fraggedFiles; }
-        }
-        public List<uint> UnfraggedFiles
-        {
-            get { return _unfraggedFiles; }
-        }
-        public List<uint> UnmovableFiles
-        {
-            get { return _unmovableFiles; }
-        }
+        public List<uint> FraggedFiles => _fraggedFiles;
+
+        public List<uint> UnfraggedFiles => _unfraggedFiles;
+        public List<uint> UnmovableFiles => _unmovableFiles;
 
         public DefragReport()
         {

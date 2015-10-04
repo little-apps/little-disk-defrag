@@ -27,15 +27,9 @@ namespace Little_Disk_Defrag.Helpers
         private readonly UInt64 _clusterCount;
         private UInt64 _clusterProgress;
 
-        public Defragment Defrag
-        {
-            get { return _defrag; }
-        }
+        public Defragment Defrag => _defrag;
 
-        public DriveVolume Volume
-        {
-            get { return _volume; }
-        }
+        public DriveVolume Volume => _volume;
 
         public double Percent
         {
@@ -48,10 +42,7 @@ namespace Little_Disk_Defrag.Helpers
             set { Defrag.PleaseStop = value; }
         }
 
-        public UInt64 ClusterCount
-        {
-            get { return _clusterCount; }
-        }
+        public UInt64 ClusterCount => _clusterCount;
 
         public UInt64 ClusterProgress
         {

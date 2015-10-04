@@ -97,10 +97,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
             set { _totalClusters = value; }
         }
 
-        public DriveVolume Volume
-        {
-            get { return _vol; }
-        }
+        public DriveVolume Volume => _vol;
 
         public PartInfo(DriveVolume volume)
         {

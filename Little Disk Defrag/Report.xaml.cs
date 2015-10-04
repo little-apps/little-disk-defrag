@@ -227,25 +227,13 @@ namespace Little_Disk_Defrag
             }
         }
 
-        public string SelectedUnit
-        {
-            get { return Units[SelectedIndexUnit]; }
-        }
+        public string SelectedUnit => Units[SelectedIndexUnit];
 
-        public string[] Units
-        {
-            get { return _units; }
-        }
+        public string[] Units => _units;
 
-        public Defragment Defragger
-        {
-            get { return _defragger; }
-        }
+        public Defragment Defragger => _defragger;
 
-        public DefragReport DefragReport
-        {
-            get { return _defragReport; }
-        }
+        public DefragReport DefragReport => _defragReport;
 
         public Report(Defragment defragger)
         {

@@ -44,10 +44,7 @@ namespace Little_Disk_Defrag.Helpers
         public bool PleaseStop;
         public bool PleasePause;
 
-        public DefragMethod DefragType
-        {
-            get { return _method; }
-        }
+        public DefragMethod DefragType => _method;
 
         /// <summary>
         /// Limit length of status string to 70 chars?
@@ -58,15 +55,9 @@ namespace Little_Disk_Defrag.Helpers
             set { _doLimitLength = value; }
         }
 
-        public bool IsDoneYet
-        {
-            get { return Done; }
-        }
+        public bool IsDoneYet => Done;
 
-        public bool HasError
-        {
-            get { return Error; }
-        }
+        public bool HasError => Error;
 
         public bool ShowReport
         {
@@ -104,19 +95,10 @@ namespace Little_Disk_Defrag.Helpers
             }
         }
 
-        public string DriveName
-        {
-            get { return _driveName; }
-        }
+        public string DriveName => _driveName;
 
-        public DefragReport Report
-        { 
-            get { return _defragReport; }
-        }
-        public DriveVolume Volume
-        {
-            get { return _driveVolume; }
-        }
+        public DefragReport Report => _defragReport;
+        public DriveVolume Volume => _driveVolume;
 
         public bool VolumeOpen { get; set; }
 

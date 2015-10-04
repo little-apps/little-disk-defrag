@@ -92,10 +92,7 @@ namespace Little_Disk_Defrag
 
         private DispatcherTimer timer;
 
-        private DriveVolume Volume
-        {
-            get { return _volume; }
-        }
+        private DriveVolume Volume => _volume;
 
         public Drawing()
         {

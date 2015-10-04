@@ -39,15 +39,9 @@ namespace Little_Disk_Defrag.Helpers
         private PartInfo _partInfo;
         private FileStream _driveStream;
 
-        public PartInfo PartInfo
-        {
-            get { return _partInfo; }
-        }
+        public PartInfo PartInfo => _partInfo;
 
-        public FileStream DriveStream
-        {
-            get { return _driveStream; }
-        }
+        public FileStream DriveStream => _driveStream;
 
         public PInvoke.DISK_GEOMETRY Geometry
         {
@@ -59,40 +53,19 @@ namespace Little_Disk_Defrag.Helpers
         /// Location of volume (with leading slash)
         /// </summary>
         /// <example>C:\</example>
-        public string RootPath
-        {
-            get { return _rootPath; }
-        }
+        public string RootPath => _rootPath;
 
-        public List<string> Directories
-        {
-            get { return _directoryList; }
-        }
+        public List<string> Directories => _directoryList;
 
-        public List<FileInfo> Files
-        {
-            get { return _fileList; }
-        }
+        public List<FileInfo> Files => _fileList;
 
-        public int DBFileCount
-        {
-            get { return _fileList.Count; }
-        }
+        public int DBFileCount => _fileList.Count;
 
-        public int DBDirCount
-        {
-            get { return _directoryList.Count; }
-        }
+        public int DBDirCount => _directoryList.Count;
 
-        public bool BitmapLoaded
-        {
-            get { return (!((BitmapDetail == null) || BitmapDetail.Length == 0)); }
-        }
+        public bool BitmapLoaded => (!((BitmapDetail == null) || BitmapDetail.Length == 0));
 
-        public DriveInfo DriveInfo
-        {
-            get { return _driveInfo; }
-        }
+        public DriveInfo DriveInfo => _driveInfo;
 
         public DriveVolume()
         {

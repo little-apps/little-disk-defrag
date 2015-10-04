@@ -175,12 +175,6 @@ namespace Little_Disk_Defrag.Misc
             return string.Copy(path + filename);
         }
 
-        internal static string ProductName
-        {
-            get
-            {
-                return App.ResourceAssembly.GetName().Name;
-            }
-        }
+        internal static string ProductName => App.ResourceAssembly.GetName().Name;
     }
 }

@@ -11,10 +11,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
         private ulong _bytesPerMftRecord;
         private ulong _clustersPerIndexRecord;
 
-        public LinkedList<MFTEntry> MFTEntries
-        {
-            get { return _mftEntries; }
-        }
+        public LinkedList<MFTEntry> MFTEntries => _mftEntries;
 
         public NTFS(DriveVolume volume) 
             : base(volume)
