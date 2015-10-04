@@ -138,7 +138,11 @@ namespace Little_Disk_Defrag
             if (DrawTask.Status == TaskStatus.Running)
                 _cancellationTokenSource?.Cancel();
 
-            await Task.Run(() => { while (DrawTask.Status == TaskStatus.Running); });
+            await Task.Run(() => {
+                while (DrawTask.Status == TaskStatus.Running)
+                {
+                }
+            });
 
             // Clear canvas
             draw.Clear();
