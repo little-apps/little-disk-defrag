@@ -328,9 +328,7 @@ namespace Little_Disk_Defrag.Helpers
 
                     for (j = 0; j < Volume.DBFileCount; j++)
                     {
-                        FileInfo Info;
-
-                        Info = Volume.GetDBFile(j);
+                        var Info = Volume.GetDBFile(j);
 
                         Report.FilesFragments += (uint)Utils.Max(1UL, (ulong)Info.Fragments.Count); // add 1 fragment even for 0 bytes/0 cluster files
 
