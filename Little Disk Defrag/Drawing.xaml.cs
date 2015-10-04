@@ -13,7 +13,7 @@ namespace Little_Disk_Defrag
     /// <summary>
     /// Interaction logic for Drawing.xaml
     /// </summary>
-    public partial class Drawing : ContentControl
+    public partial class Drawing
     {
         #region Colors
         private static readonly uint ColWhite = 0xFFFFFF;
@@ -595,8 +595,8 @@ namespace Little_Disk_Defrag
         {
             int x1 = 0;
             int y1 = 0;
-            int h = (int)Height;
-            int w = (int)Width;
+            //int h = (int)Height;
+            //int w = (int)Width;
 
             if (BlockSize < 5) 
                 return;
