@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Little_Disk_Defrag.Helpers.Partitions;
 using Little_Disk_Defrag.Misc;
@@ -282,11 +283,7 @@ namespace Little_Disk_Defrag.Helpers
                 Info.Clusters = 0;
                 if (GetClusterInfo(Info, ref Handle))
                 {
-                    UInt64 TotalClusters = 0;
-
-                    foreach (Extent ext in Info.Fragments) {
-                        TotalClusters += ext.Length;
-                    }
+                    UInt64 TotalClusters = Info.Fragments.Aggregate<Extent, ulong>(0, (current, ext) => current + ext.Length);
 
                     Info.Clusters = TotalClusters;
                 }
