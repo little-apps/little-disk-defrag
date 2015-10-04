@@ -42,16 +42,7 @@ namespace Little_Disk_Defrag
         private static uint ColF5;
         #endregion
 
-        int _blockSize;
-
-        public int BlockSize
-        {
-            get { return _blockSize; }
-            set
-            {
-                _blockSize = value;
-            }
-        }
+        public int BlockSize { get; set; }
 
         readonly ulong colorSteps = 6;
 
