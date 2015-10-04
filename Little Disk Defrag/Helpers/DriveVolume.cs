@@ -419,10 +419,7 @@ namespace Little_Disk_Defrag.Helpers
                 Extents *= 2;
                 RetSize = RETRIEVAL_POINTERS_BUFFER_SIZE + (uint)((Extents - 1) * Marshal.SizeOf(typeof(PInvoke.LARGE_INTEGER)) * 2);
 
-                if (pDest != IntPtr.Zero)
-                    pDest = Marshal.ReAllocHGlobal(pDest, (IntPtr)RetSize);
-                else
-                    pDest = Marshal.AllocHGlobal((int)RetSize);
+                pDest = pDest != IntPtr.Zero ? Marshal.ReAllocHGlobal(pDest, (IntPtr)RetSize) : Marshal.AllocHGlobal((int)RetSize);
 
                 Result = PInvoke.DeviceIoControl
                 (
