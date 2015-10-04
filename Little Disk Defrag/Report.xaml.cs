@@ -285,39 +285,42 @@ namespace Little_Disk_Defrag
 
             // DiskSizeBytes
             if (Fractional)
-                DiskSize = string.Format("{0:F2} {1}", DefragReport.DiskSizeBytes / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit);
+                DiskSize = $"{DefragReport.DiskSizeBytes/(BytesDivisor/1024D)/1024.0D:F2} {SelectedUnit}";
             else
-                DiskSize = string.Format("{0:N0}", DefragReport.DiskSizeBytes / BytesDivisor) + " " + SelectedUnit;
+                DiskSize = $"{DefragReport.DiskSizeBytes/BytesDivisor:N0}" + " " + SelectedUnit;
 
             // DiskFreeBytes
             if (Fractional)
-                FreeSpace = string.Format("{0:F2} {1}", DefragReport.FreeBytes / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit);
+                FreeSpace = $"{DefragReport.FreeBytes/(BytesDivisor/1024D)/1024.0D:F2} {SelectedUnit}";
             else
-                FreeSpace = string.Format("{0:N0}", DefragReport.FreeBytes / BytesDivisor) + " " + SelectedUnit;
+                FreeSpace = $"{DefragReport.FreeBytes/BytesDivisor:N0}" + " " + SelectedUnit;
 
             // DiskSizeClusters
-            TotalClusters = string.Format("{0:N0} clusters", DefragReport.ClusterCount);
+            TotalClusters = $"{DefragReport.ClusterCount:N0} clusters";
 
             // DiskClusterSize
-            ClusterSize = string.Format("{0} bytes", DefragReport.ClusterSize);
+            ClusterSize = $"{DefragReport.ClusterSize} bytes";
 
             // DirsCount
-            DirCount = string.Format("{0:N0}", DefragReport.DirsCount);
+            DirCount = $"{DefragReport.DirsCount:N0}";
 
             // FilesCount
-            FilesCount = string.Format("{0:N0}", DefragReport.FilesCount);
+            FilesCount = $"{DefragReport.FilesCount:N0}";
 
             // FilesFragged
-            Fragmented = string.Format("{0:F2}% {1:N0}", DefragReport.PercentFragged, DefragReport.FraggedFiles.Count);
+            Fragmented = $"{DefragReport.PercentFragged:F2}% {DefragReport.FraggedFiles.Count:N0}";
 
             // Average Frags
-            AvgFragments = string.Format("{0:F2}", DefragReport.AverageFragments);
+            AvgFragments = $"{DefragReport.AverageFragments:F2}";
 
             // FilesSizeBytes
-            TotalSize = Fractional ? string.Format("{0:F2} {1}", DefragReport.FilesSizeBytes / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit) : string.Format("{0:N0} {1}", DefragReport.FilesSizeBytes / BytesDivisor, SelectedUnit);
+            TotalSize = Fractional ? $"{DefragReport.FilesSizeBytes/(BytesDivisor/1024D)/1024.0D:F2} {SelectedUnit}"
+                : $"{DefragReport.FilesSizeBytes/BytesDivisor:N0} {SelectedUnit}";
 
             // Files SizeOnDisk
-            DiskSize = Fractional ? string.Format("{0:F2} {1}", (DefragReport.FilesSizeBytes + DefragReport.FilesSlackBytes) / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit) : string.Format("{0:N0} {1}", (DefragReport.FilesSizeBytes + DefragReport.FilesSlackBytes) / BytesDivisor, SelectedUnit);
+            DiskSize = Fractional ?
+                $"{(DefragReport.FilesSizeBytes + DefragReport.FilesSlackBytes)/(BytesDivisor/1024D)/1024.0D:F2} {SelectedUnit}"
+                : $"{(DefragReport.FilesSizeBytes + DefragReport.FilesSlackBytes)/BytesDivisor:N0} {SelectedUnit}";
 
             // FilesSlackBytes
             WastedSlack = Fractional ? string.Format("({2:F2}%) {0:F2} {1}", DefragReport.FilesSlackBytes / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit, DefragReport.PercentSlack) : string.Format("({2:F2}%) {0:N0} {1}", DefragReport.FilesSlackBytes / BytesDivisor, SelectedUnit, DefragReport.PercentSlack);
@@ -335,10 +338,11 @@ namespace Little_Disk_Defrag
             var Text = "* ";
 
             if (PFRec)
-                Text += string.Format("{0:F2}% of the files on this volume are fragmented. ", DefragReport.PercentFragged);
+                Text += $"{DefragReport.PercentFragged:F2}% of the files on this volume are fragmented. ";
 
             if (AFRec)
-                Text += string.Format("The average fragments per file ({0:F2}) indicates a high degree of fragmentation. ", DefragReport.AverageFragments);
+                Text +=
+                    $"The average fragments per file ({DefragReport.AverageFragments:F2}) indicates a high degree of fragmentation. ";
 
             if (DefragReport.PercentFragged < 5.0D && DefragReport.AverageFragments < 1.1D)
                 Text = "* No defragmentation is necessary at this point.";

@@ -160,7 +160,7 @@ namespace Little_Disk_Defrag
             {
                 string DefragText = Application.ResourceAssembly.GetName().Name + " v" + Application.ResourceAssembly.GetName().Version.Major + "." + Application.ResourceAssembly.GetName().Version.Minor;
 
-                string Percent = string.Format("{0:F2}%", ProgressBarValue);
+                string Percent = $"{ProgressBarValue:F2}%";
 
                 if (IsDefragmentActive)
                     DefragText = Percent + " - " + _defragger.Volume.RootPath + " - " + DefragText;

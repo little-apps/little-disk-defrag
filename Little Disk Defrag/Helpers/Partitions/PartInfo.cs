@@ -61,7 +61,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
                 FileSystem = FSName.ToString();
                 MaxNameLen = VolMaxFileLen;
                 Name = VolName.ToString();
-                Serial = string.Format("{0:X}-{1:X}", (VolSN & 0xffff0000) >> 16, VolSN & 0x0000ffff);
+                Serial = $"{(VolSN & 0xffff0000) >> 16:X}-{VolSN & 0x0000ffff:X}";
             }
             else
             {
