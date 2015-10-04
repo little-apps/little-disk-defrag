@@ -17,7 +17,6 @@
 */
 
 using System.ComponentModel;
-using System.Windows;
 using Little_Disk_Defrag.Helpers;
 
 namespace Little_Disk_Defrag
