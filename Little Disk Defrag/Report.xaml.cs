@@ -25,7 +25,7 @@ namespace Little_Disk_Defrag
     /// <summary>
     /// Interaction logic for Report.xaml
     /// </summary>
-    public partial class Report : Window, INotifyPropertyChanged
+    public partial class Report : INotifyPropertyChanged
     {
         #region INotifyPropertyChanged Members
 
@@ -354,14 +354,10 @@ namespace Little_Disk_Defrag
             // Should we recommend a smaller cluster size?
             if (DefragReport.PercentSlack >= 10.0f)
             {
-                Text += string.Format(
-                    "\n* A large amount of disk space ({0:F2}%) is being lost " + 
-                    "due to a large (%{0} bytes) cluster size. It is recommended " + 
-                    "that you use a disk utility such as Partition Magic to " + 
-                    "reduce the cluster size of this volume.",
-                    DefragReport.PercentSlack,
-                    DefragReport.ClusterSize
-                    );
+                Text += $"\n* A large amount of disk space ({DefragReport.PercentSlack:F2}%) is being lost " +
+                        $"due to a large (%{DefragReport.ClusterSize} bytes) cluster size. It is recommended " +
+                        "that you use a disk utility such as Partition Magic to " +
+                        "reduce the cluster size of this volume.";
             }
 
             Recommendations = Text;
