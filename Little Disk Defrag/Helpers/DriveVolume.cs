@@ -625,7 +625,7 @@ namespace Little_Disk_Defrag.Helpers
                 }
                 catch
                 {
-
+                    // ignored
                 }
                 finally
                 {

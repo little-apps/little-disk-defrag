@@ -39,7 +39,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
 
         public DriveVolume Volume => _vol;
 
-        public PartInfo(DriveVolume volume)
+        protected PartInfo(DriveVolume volume)
         {
             _vol = volume;
         }
