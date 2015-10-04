@@ -470,7 +470,6 @@ namespace Little_Disk_Defrag.Helpers
         {
             ulong Max;
             ulong i;
-            ulong j;
 
             LCNResult = 0;
 
@@ -487,12 +486,15 @@ namespace Little_Disk_Defrag.Helpers
                     Found = false;
                 else
                 // Check the whole darn range.
-                for (j = (i + 1); j < (i + ReqLength - 2); j++)
                 {
-                    if (IsClusterUsed(j))
+                    ulong j;
+                    for (j = (i + 1); j < (i + ReqLength - 2); j++)
                     {
-                        Found = false;
-                        break;
+                        if (IsClusterUsed(j))
+                        {
+                            Found = false;
+                            break;
+                        }
                     }
                 }
 

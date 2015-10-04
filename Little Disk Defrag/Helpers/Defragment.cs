@@ -199,10 +199,6 @@ namespace Little_Disk_Defrag.Helpers
         }
 
         public void Start() {
-            uint i;
-            UInt64 FirstFreeLCN;
-            UInt64 TotalClusters;
-            UInt64 ClustersProgress;
             string PrintName = string.Empty;
             int Width = 70;
 
@@ -284,16 +280,18 @@ namespace Little_Disk_Defrag.Helpers
                 }
 
                 StatusString = "Analyzing database for " + DriveName;
-                TotalClusters = 0;
+                UInt64 TotalClusters = 0;
+                uint i;
                 for (i = 0; i < Volume.DBFileCount; i++)
                 {
                     TotalClusters += Volume.GetDBFile(i).Clusters;
                 }
 
                 // Defragment!
-                ClustersProgress = 0;
+                UInt64 ClustersProgress = 0;
 
                 // Find first free LCN for speedier searches ...
+                UInt64 FirstFreeLCN;
                 Volume.FindFreeRange(0, 1, out FirstFreeLCN);
 
                 if (PleaseStop)

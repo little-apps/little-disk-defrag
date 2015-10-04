@@ -220,16 +220,12 @@ namespace Little_Disk_Defrag
             int currentX = 0;
             int currentY = 0;
 
-            IntPtr CurrentLCNPtr;
-            IntPtr pDest;
-
             uint BytesReturned = 0;
 
             uint BitmapSize = (65536 + 2 * sizeof(ulong));
 
             int err;
 
-            ulong i;
             ulong currLcn = 0;
             ulong? lastLcn = 0;
             ulong lastCluster = 0;
@@ -251,9 +247,9 @@ namespace Little_Disk_Defrag
                     break;
 
                 GCHandle handle = GCHandle.Alloc(currLcn, GCHandleType.Pinned);
-                CurrentLCNPtr = handle.AddrOfPinnedObject();
+                var CurrentLCNPtr = handle.AddrOfPinnedObject();
 
-                pDest = Marshal.AllocHGlobal((int)BitmapSize);
+                var pDest = Marshal.AllocHGlobal((int)BitmapSize);
 
                 PInvoke.DeviceIoControl(
                     Volume.Handle,
@@ -272,6 +268,7 @@ namespace Little_Disk_Defrag
 
                 PInvoke.VOLUME_BITMAP_BUFFER BitmapBuffer = new PInvoke.VOLUME_BITMAP_BUFFER(pDest, (int)BitmapSize);
 
+                ulong i;
                 for (i = 0; i < Max; i++)
                 {
                     if (_cancellationTokenSource.IsCancellationRequested)
@@ -542,12 +539,9 @@ namespace Little_Disk_Defrag
 
         public void DrawBlocks(ulong clusterStart, ulong clusterEnd, uint color)
         {
-            ulong ui;
             int lastx1 = 0;
             int x1;
             int y1;
-            int x2;
-            int y2;
 
             if (Volume.PartInfo.ClusterCount == 0 || clusterEnd == 0) 
                 return;
@@ -562,8 +556,8 @@ namespace Little_Disk_Defrag
             {
                 x1 = BlockSize * (int)((clusterStart - clusterStart / clustersPerLine * clustersPerLine) / clustersPerBlock);
                 y1 = (BlockSize * (int)(clusterStart / clustersPerLine)) / BlockSize;
-                x2 = BlockSize * (int)((clusterEnd - clusterEnd / clustersPerLine * clustersPerLine) / clustersPerBlock);
-                y2 = (BlockSize * (int)(clusterEnd / clustersPerLine)) / BlockSize;
+                var x2 = BlockSize * (int)((clusterEnd - clusterEnd / clustersPerLine * clustersPerLine) / clustersPerBlock);
+                var y2 = (BlockSize * (int)(clusterEnd / clustersPerLine)) / BlockSize;
 
                 if (x1 == lastx1)
                     //  && x2-x1>1 && y2-y1==0
@@ -585,6 +579,7 @@ namespace Little_Disk_Defrag
                 y1 = (BlockSize * (int)(clusterStart / clustersPerLine));
 
                 DrawBlockAt(x1, y1, color);
+                ulong ui;
                 for (ui = clusterStart; ui + (clustersPerBlock) <= clusterEnd; ui += clustersPerBlock)
                 {
                     x1 += BlockSize;
@@ -602,11 +597,8 @@ namespace Little_Disk_Defrag
 
         private void DrawMarks(ulong clusterStart, ulong clusterEnd)
         {
-            ulong ui;
             int x1 = 0;
             int y1 = 0;
-            int x2;
-            int y2;
             int h = (int)Height;
             int w = (int)Width;
 
@@ -625,8 +617,8 @@ namespace Little_Disk_Defrag
             {
                 x1 = BlockSize * (int)((clusterStart - clusterStart / clustersPerLine * clustersPerLine) / clustersPerBlock);
                 y1 = (BlockSize * (int)(clusterStart / clustersPerLine)) / BlockSize;
-                x2 = BlockSize * (int)((clusterEnd - clusterEnd / clustersPerLine * clustersPerLine) / clustersPerBlock);
-                y2 = (BlockSize * (int)(clusterEnd / clustersPerLine)) / BlockSize;
+                var x2 = BlockSize * (int)((clusterEnd - clusterEnd / clustersPerLine * clustersPerLine) / clustersPerBlock);
+                var y2 = (BlockSize * (int)(clusterEnd / clustersPerLine)) / BlockSize;
                 DrawClusterMarkAt(x1 + 1, y1, x2, y2, ColMarks);
             }
             else
@@ -642,6 +634,7 @@ namespace Little_Disk_Defrag
                 DrawMarkAt(x1, y1, false); // start mark
                 clusterStart += clustersPerBlock;
 
+                ulong ui;
                 for (ui = clusterStart; ui + (clustersPerBlock) <= clusterEnd; ui += clustersPerBlock)
                 {
                     x1 += BlockSize;
