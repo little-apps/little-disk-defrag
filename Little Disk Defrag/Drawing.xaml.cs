@@ -149,21 +149,21 @@ namespace Little_Disk_Defrag
 
             CalculateSizes(Width, Height);
 
-            if (Volume != null && sizesCalculated)
-            {
-                //this._drawThread = new Thread(new ThreadStart(this.DrawBlocks));
-                //this.DrawThread.Start();
+            if (Volume == null || !sizesCalculated)
+                return;
 
-                _cancellationTokenSource = new CancellationTokenSource();
-                _drawTask = new Task(DrawBlocks, _cancellationTokenSource.Token);
+            //this._drawThread = new Thread(new ThreadStart(this.DrawBlocks));
+            //this.DrawThread.Start();
 
-                DrawTask.Start();
+            _cancellationTokenSource = new CancellationTokenSource();
+            _drawTask = new Task(DrawBlocks, _cancellationTokenSource.Token);
 
-                await DrawTask;
+            DrawTask.Start();
 
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
-            }
+            await DrawTask;
+
+            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource = null;
         }
 
         private void CalculateSizes(double width, double height)
