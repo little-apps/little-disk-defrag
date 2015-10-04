@@ -202,7 +202,7 @@ namespace Little_Disk_Defrag.Helpers
 
         public void Start() {
             uint i;
-            UInt64 FirstFreeLCN = 0;
+            UInt64 FirstFreeLCN;
             UInt64 TotalClusters;
             UInt64 ClustersProgress;
             string PrintName = string.Empty;
@@ -372,7 +372,7 @@ namespace Little_Disk_Defrag.Helpers
                     {
                         FileInfo Info;
                         bool Result;
-                        UInt64 TargetLCN = 0;
+                        UInt64 TargetLCN;
                         UInt64 PreviousClusters;
 
                         // What? They want us to pause? Oh ok.

@@ -48,8 +48,6 @@ namespace Little_Disk_Defrag.Misc
             {
                 Debug.WriteLine("The following error occurred: {0}\nIs the handle trying to be closed twice?", ex.Message);
             }
-            
-            handle = IntPtr.Zero;
         }
 
         internal static long? FileSeek(SafeFileHandle handle, long offset, SeekOrigin origin)
@@ -72,7 +70,7 @@ namespace Little_Disk_Defrag.Misc
             }
 
             int lo = (int)(offset & 0xffffffff);
-            int hi = (int)(offset >> 32);
+            int hi;
 
             lo = PInvoke.SetFilePointer(handle, lo, out hi, moveMethod);
 
@@ -123,9 +121,9 @@ namespace Little_Disk_Defrag.Misc
 
         internal static string FitName (string path, string filename, int totalWidth)
         {
-	        int pathLen=0;
-	        int fnLen=0;
-	        int halfTotLen=0;
+	        int pathLen;
+	        int fnLen;
+	        int halfTotLen;
 	        int len4fn=0;     /* number of chars remaining for filename after path is applied */
 	        int len4path=0;   /* number of chars for path before filename is applied          */
 

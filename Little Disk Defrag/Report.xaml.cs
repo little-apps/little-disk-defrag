@@ -316,22 +316,13 @@ namespace Little_Disk_Defrag
             AvgFragments = string.Format("{0:F2}", DefragReport.AverageFragments);
 
             // FilesSizeBytes
-            if (Fractional)
-                TotalSize = string.Format("{0:F2} {1}", DefragReport.FilesSizeBytes / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit);
-            else
-                TotalSize = string.Format("{0:N0} {1}", DefragReport.FilesSizeBytes / BytesDivisor, SelectedUnit);
+            TotalSize = Fractional ? string.Format("{0:F2} {1}", DefragReport.FilesSizeBytes / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit) : string.Format("{0:N0} {1}", DefragReport.FilesSizeBytes / BytesDivisor, SelectedUnit);
 
             // Files SizeOnDisk
-            if (Fractional)
-                DiskSize = string.Format("{0:F2} {1}", (DefragReport.FilesSizeBytes + DefragReport.FilesSlackBytes) / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit);
-            else
-                DiskSize = string.Format("{0:N0} {1}", (DefragReport.FilesSizeBytes + DefragReport.FilesSlackBytes) / BytesDivisor, SelectedUnit);
+            DiskSize = Fractional ? string.Format("{0:F2} {1}", (DefragReport.FilesSizeBytes + DefragReport.FilesSlackBytes) / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit) : string.Format("{0:N0} {1}", (DefragReport.FilesSizeBytes + DefragReport.FilesSlackBytes) / BytesDivisor, SelectedUnit);
 
             // FilesSlackBytes
-            if (Fractional)
-                WastedSlack = string.Format("({2:F2}%) {0:F2} {1}", DefragReport.FilesSlackBytes / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit, DefragReport.PercentSlack);
-            else
-                WastedSlack = string.Format("({2:F2}%) {0:N0} {1}", DefragReport.FilesSlackBytes / BytesDivisor, SelectedUnit, DefragReport.PercentSlack);
+            WastedSlack = Fractional ? string.Format("({2:F2}%) {0:F2} {1}", DefragReport.FilesSlackBytes / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit, DefragReport.PercentSlack) : string.Format("({2:F2}%) {0:N0} {1}", DefragReport.FilesSlackBytes / BytesDivisor, SelectedUnit, DefragReport.PercentSlack);
 
             // Recommendation
             bool PFRec = false; // Recommend based off percent fragged files?

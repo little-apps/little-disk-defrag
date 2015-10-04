@@ -497,7 +497,7 @@ namespace Little_Disk_Defrag
 
         private void DrawBlockBounds(ulong clusterStart, ulong clusterEnd, bool clear)
         {
-            ulong ui = 0;
+            ulong ui;
             ulong x = 0;
             ulong y = 0;
 
@@ -544,10 +544,10 @@ namespace Little_Disk_Defrag
         {
             ulong ui;
             int lastx1 = 0;
-            int x1 = 0;
-            int y1 = 0;
-            int x2 = 0;
-            int y2 = 0;
+            int x1;
+            int y1;
+            int x2;
+            int y2;
 
             if (Volume.PartInfo.ClusterCount == 0 || clusterEnd == 0) 
                 return;
@@ -569,7 +569,9 @@ namespace Little_Disk_Defrag
                     //  && x2-x1>1 && y2-y1==0
                     x1 = x1 - 1;
 
+/*
                 lastx1 = x2;
+*/
 
                 if (x2 - x1 <= 1 && y2 - y1 == 0)
                     DrawClustersAt(x1, y1, x1 + 1, y2, color);
@@ -603,8 +605,8 @@ namespace Little_Disk_Defrag
             ulong ui;
             int x1 = 0;
             int y1 = 0;
-            int x2 = 0;
-            int y2 = 0;
+            int x2;
+            int y2;
             int h = (int)Height;
             int w = (int)Width;
 

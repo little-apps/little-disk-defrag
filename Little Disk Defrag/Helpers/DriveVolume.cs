@@ -141,7 +141,7 @@ namespace Little_Disk_Defrag.Helpers
             Int64 StartingLCN = 0;
             IntPtr StartingLCNPtr;
             PInvoke.VOLUME_BITMAP_BUFFER Bitmap;
-            UInt32 BitmapSize = 0;
+            UInt32 BitmapSize;
             uint BytesReturned = 0;
             bool Result;
             IntPtr pDest;
@@ -194,7 +194,9 @@ namespace Little_Disk_Defrag.Helpers
             }
 
             Bitmap = new PInvoke.VOLUME_BITMAP_BUFFER(pDest, true);
+/*
             BitmapSize = (uint)Marshal.SizeOf(typeof(PInvoke.VOLUME_BITMAP_BUFFER)) + ((uint)Bitmap.BitmapSize.QuadPart / 8) + 1;
+*/
 
             PartInfo.ClusterCount = Bitmap.BitmapSize.QuadPart;
 
@@ -405,7 +407,6 @@ namespace Little_Disk_Defrag.Helpers
             // btw, the Extents variable tends to only reflect memory usage, so when we have
             // all the extents we look at the structure Win32 gives us for the REAL count!
             Extents = 10;
-            RetSize = 0;
 
             const uint RETRIEVAL_POINTERS_BUFFER_SIZE = 28;
 
@@ -528,7 +529,7 @@ namespace Little_Disk_Defrag.Helpers
         /// <returns>True if file was moved</returns>
         public bool MoveFileDumb (int FileIndice, ulong NewLCN)
         {
-            bool ReturnVal = false;
+            bool ReturnVal;
             FileInfo Info;
             SafeFileHandle FileHandle;
             string FullName;

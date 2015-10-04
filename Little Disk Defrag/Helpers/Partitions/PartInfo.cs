@@ -120,12 +120,12 @@ namespace Little_Disk_Defrag.Helpers.Partitions
 
             ulong totalBytes, freeBytes;
 
-            Result = PInvoke.GetDiskFreeSpaceEx(
+            PInvoke.GetDiskFreeSpaceEx(
                 Volume.RootPath,
                 out nan,
                 out totalBytes,
                 out freeBytes
-            );
+                );
 
             TotalBytes = totalBytes;
             FreeBytes = freeBytes;

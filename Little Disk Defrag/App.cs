@@ -10,7 +10,7 @@ namespace Little_Disk_Defrag
         [STAThread]
         static void Main()
         {
-            bool bMutexCreated = false;
+            bool bMutexCreated;
             Mutex mutexMain = new Mutex(true, "Little Disk Defrag", out bMutexCreated);
 
             // If mutex isnt available, show message and exit...
