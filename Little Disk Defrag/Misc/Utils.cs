@@ -21,6 +21,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows;
 using System.Windows.Media;
 
 namespace Little_Disk_Defrag.Misc
@@ -169,6 +170,6 @@ namespace Little_Disk_Defrag.Misc
             return string.Copy(path + filename);
         }
 
-        internal static string ProductName => App.ResourceAssembly.GetName().Name;
+        internal static string ProductName => Application.ResourceAssembly.GetName().Name;
     }
 }
