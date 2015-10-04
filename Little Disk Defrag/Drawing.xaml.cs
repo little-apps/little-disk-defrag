@@ -1,23 +1,11 @@
-﻿using Little_Disk_Defrag.Helpers;
-using Little_Disk_Defrag.Misc;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Windows.Threading;
+using Little_Disk_Defrag.Helpers;
+using Little_Disk_Defrag.Misc;
 
 namespace Little_Disk_Defrag
 {
@@ -58,13 +46,13 @@ namespace Little_Disk_Defrag
 
         public int BlockSize
         {
-            get { return this._blockSize; }
+            get { return _blockSize; }
             set
             {
-                if (this._blockSize == value)
+                if (_blockSize == value)
                     return;
 
-                this._blockSize = value;
+                _blockSize = value;
             }
         }
 
@@ -77,7 +65,7 @@ namespace Little_Disk_Defrag
         ulong clustersPerBlock;
         ulong blockCount;
 
-        bool sizesCalculated = false;
+        bool sizesCalculated;
 
         private static double ThreadSafeWidth = double.NaN;
 
@@ -92,13 +80,13 @@ namespace Little_Disk_Defrag
         {
             get
             {
-                if (this._drawTask == null)
+                if (_drawTask == null)
                 {
-                    this._cancellationTokenSource = new CancellationTokenSource();
-                    this._drawTask = new Task(DrawBlocks, this._cancellationTokenSource.Token);
+                    _cancellationTokenSource = new CancellationTokenSource();
+                    _drawTask = new Task(DrawBlocks, _cancellationTokenSource.Token);
                 }
                     
-                return this._drawTask;
+                return _drawTask;
             }
         }
 
@@ -106,18 +94,18 @@ namespace Little_Disk_Defrag
 
         private DriveVolume Volume
         {
-            get { return this._volume; }
+            get { return _volume; }
         }
 
         public Drawing()
         {
             InitializeComponent();
 
-            this.draw = new Draw();
+            draw = new Draw();
 
-            this.Content = this.draw;
+            Content = draw;
 
-            this.BlockSize = 9;
+            BlockSize = 9;
 
             ColF1 = Utils.LighterVal(ColFile, 32);
             ColF2 = Utils.LighterVal(ColFile, 64);
@@ -128,26 +116,26 @@ namespace Little_Disk_Defrag
 
         public void SetDriveVolume(DriveVolume vol)
         {
-            this._volume = vol;
+            _volume = vol;
 
-            this.Redraw();
+            Redraw();
         }
 
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
 
-            this.Content = this.draw;
+            Content = draw;
 
-            this.timer = new DispatcherTimer() { Interval = new TimeSpan(0, 0, 0, 0, 250), IsEnabled = true };
-            this.timer.Tick += RefreshDrawing;
+            timer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 0, 250), IsEnabled = true };
+            timer.Tick += RefreshDrawing;
         }
 
         public void RefreshDrawing(object o, EventArgs e)
         {
-            if (this.DrawTask.Status == TaskStatus.Running)
+            if (DrawTask.Status == TaskStatus.Running)
             {
-                this.draw.InvalidateVisual();
+                draw.InvalidateVisual();
             }
             
         }
@@ -157,82 +145,82 @@ namespace Little_Disk_Defrag
             if (double.IsNaN(width) || double.IsNaN(height))
                 return;
 
-            if (width != this.Width)
-                this.Width = width;
+            if (width != Width)
+                Width = width;
 
-            if (height != this.Height)
-                this.Height = height;
+            if (height != Height)
+                Height = height;
         }
 
         public async void Redraw()
         {
-            if (this.DrawTask.Status == TaskStatus.Running)
-                this._cancellationTokenSource?.Cancel();
+            if (DrawTask.Status == TaskStatus.Running)
+                _cancellationTokenSource?.Cancel();
 
-            await Task.Run(() => { while (this.DrawTask.Status == TaskStatus.Running); });
+            await Task.Run(() => { while (DrawTask.Status == TaskStatus.Running); });
 
             // Clear canvas
-            this.draw.Clear();
+            draw.Clear();
 
-            this.CalculateSizes(this.Width, this.Height);
+            CalculateSizes(Width, Height);
 
-            if (this.Volume != null && this.sizesCalculated)
+            if (Volume != null && sizesCalculated)
             {
                 //this._drawThread = new Thread(new ThreadStart(this.DrawBlocks));
                 //this.DrawThread.Start();
 
-                this._cancellationTokenSource = new CancellationTokenSource();
-                this._drawTask = new Task(DrawBlocks, this._cancellationTokenSource.Token);
+                _cancellationTokenSource = new CancellationTokenSource();
+                _drawTask = new Task(DrawBlocks, _cancellationTokenSource.Token);
 
-                this.DrawTask.Start();
+                DrawTask.Start();
 
-                await this.DrawTask;
+                await DrawTask;
 
-                this._cancellationTokenSource.Dispose();
-                this._cancellationTokenSource = null;
+                _cancellationTokenSource.Dispose();
+                _cancellationTokenSource = null;
             }
         }
 
         private void CalculateSizes(double width, double height)
         {
-            if (this.Volume == null)
+            if (Volume == null)
                 return;
 
             if (double.IsNaN(width) || double.IsNaN(height))
                 return;
 
-            this.blocksPerLine = (int)((width) / (this.BlockSize));
-            this.blockLines = (int)((height - (30 + this.BlockSize)) / (this.BlockSize));
+            blocksPerLine = (int)((width) / (BlockSize));
+            blockLines = (int)((height - (30 + BlockSize)) / (BlockSize));
 
-            if (this.blockLines < 1)
-                this.blockLines = 1; // minimum size: 1 line
-            if (this.blocksPerLine < 1)
-                this.blocksPerLine = 1; // minimum size: 1 line
+            if (blockLines < 1)
+                blockLines = 1; // minimum size: 1 line
+            if (blocksPerLine < 1)
+                blocksPerLine = 1; // minimum size: 1 line
 
-            this.clustersPerBlock = 0;
-            while ((ulong)this.blocksPerLine * (ulong)this.blockLines * this.clustersPerBlock < this.Volume.PartInfo.ClusterCount)
-                this.clustersPerBlock++;
+            clustersPerBlock = 0;
+            while ((ulong)blocksPerLine * (ulong)blockLines * clustersPerBlock < Volume.PartInfo.ClusterCount)
+                clustersPerBlock++;
 
-            this.clustersPerLine = (ulong)this.blocksPerLine * (ulong)this.clustersPerBlock;
-            this.blockCount = (ulong)this.blocksPerLine * (ulong)this.blockLines;
+            clustersPerLine = (ulong)blocksPerLine * clustersPerBlock;
+            blockCount = (ulong)blocksPerLine * (ulong)blockLines;
 
-            if (!this.sizesCalculated)
-                this.sizesCalculated = true;
+            if (!sizesCalculated)
+                sizesCalculated = true;
         }
 
         public void DrawBlocks()
         {
-            if (!this.Volume.BitmapLoaded)
+            if (!Volume.BitmapLoaded)
                 return;
 
             //if (Drawing.IsDrawing)
             //    return;
 
             // Wait until width is not NaN
-            while (double.IsNaN(this.GetWidth()))
+            while (double.IsNaN(GetWidth()))
                 continue;
 
-            Drawing.ThreadSafeWidth = this.GetWidth();
+            ThreadSafeWidth = GetWidth();
 
             int currentX = 0;
             int currentY = 0;
@@ -258,9 +246,9 @@ namespace Little_Disk_Defrag
             ulong numFree2 = 0;
             ulong numFree3 = 0;
 
-            int[] BitShift = new int[] { 1, 2, 4, 8, 16, 32, 64, 128 };
+            int[] BitShift = { 1, 2, 4, 8, 16, 32, 64, 128 };
 
-            ulong Max = Utils.Min(this.Volume.PartInfo.ClusterCount, 8 * 65536);
+            ulong Max = Utils.Min(Volume.PartInfo.ClusterCount, 8 * 65536);
 
             do
             {
@@ -273,7 +261,7 @@ namespace Little_Disk_Defrag
                 pDest = Marshal.AllocHGlobal((int)BitmapSize);
 
                 PInvoke.DeviceIoControl(
-                    this.Volume.Handle,
+                    Volume.Handle,
                     PInvoke.FSConstants.FSCTL_GET_VOLUME_BITMAP,
                     CurrentLCNPtr,
                     (uint)Marshal.SizeOf(currLcn),
@@ -307,7 +295,7 @@ namespace Little_Disk_Defrag
                             {
                                 numFree2 += numFree;
                                 //cFreeSpaceGaps++;
-                                if (this.BlockSize == 1)
+                                if (BlockSize == 1)
                                     DrawBlocks(cluster2.Value, cluster2.Value + numFree2, 0xFFFFFF);
 
                                 lastCluster = cluster2.Value + numFree2;
@@ -327,9 +315,9 @@ namespace Little_Disk_Defrag
                         {
                             cluster = currLcn + i;
 
-                            if (this.BlockSize == 1)
+                            if (BlockSize == 1)
                             {
-                                this.DrawBlocks(lastCluster, cluster.Value, ColFile);
+                                DrawBlocks(lastCluster, cluster.Value, ColFile);
                             }
 
                             if (!cluster2.HasValue)
@@ -348,38 +336,38 @@ namespace Little_Disk_Defrag
 
                     clusterCount++;
 
-                    if (clusterCount == this.clustersPerBlock)
+                    if (clusterCount == clustersPerBlock)
                     {
-                        clusterCount2 += this.clustersPerBlock;
+                        clusterCount2 += clustersPerBlock;
                     }
 
                     // prevent drawing as one big block
-                    if (clusterCount2 >= this.clustersPerLine && this.BlockSize == 1)
+                    if (clusterCount2 >= clustersPerLine && BlockSize == 1)
                     {
-                        if (cluster2.HasValue && numFree > this.clustersPerLine)
+                        if (cluster2.HasValue && numFree > clustersPerLine)
                             DrawBlocks(cluster2.Value, cluster2.Value + numFree, ColWhite);
                         else if (numFree == 0)
-                            DrawBlocks(currLcn + i - this.clustersPerLine, currLcn + i, ColFile);
+                            DrawBlocks(currLcn + i - clustersPerLine, currLcn + i, ColFile);
                         clusterCount2 = 0;
                     }
 
                     // draw the shit
-                    if (clusterCount >= this.clustersPerBlock)
+                    if (clusterCount >= clustersPerBlock)
                     {
-                        if (this.BlockSize != 1)
+                        if (BlockSize != 1)
                         {
                             DrawNoBlockBound(currentX, currentY); // just make sure all is new
-                            if (numFree3 >= this.clustersPerBlock)
+                            if (numFree3 >= clustersPerBlock)
                                 DrawBlockAt(currentX, currentY, ColWhite);
                             else if (numFree3 == 0)
                                 DrawBlockAt(currentX, currentY, ColFile);
-                            else if (numFree3 >= (this.clustersPerBlock / this.colorSteps) * 4)
+                            else if (numFree3 >= (clustersPerBlock / colorSteps) * 4)
                                 DrawBlockAt(currentX, currentY, ColF5);
-                            else if (numFree3 >= (this.clustersPerBlock / this.colorSteps) * 3)
+                            else if (numFree3 >= (clustersPerBlock / colorSteps) * 3)
                                 DrawBlockAt(currentX, currentY, ColF4);
-                            else if (numFree3 >= (this.clustersPerBlock / this.colorSteps) * 2)
+                            else if (numFree3 >= (clustersPerBlock / colorSteps) * 2)
                                 DrawBlockAt(currentX, currentY, ColF3);
-                            else if (numFree3 >= (this.clustersPerBlock / this.colorSteps))
+                            else if (numFree3 >= (clustersPerBlock / colorSteps))
                                 DrawBlockAt(currentX, currentY, ColF2);
                             else
                                 DrawBlockAt(currentX, currentY, ColF1);
@@ -392,12 +380,12 @@ namespace Little_Disk_Defrag
                                     }
                             */
 
-                            currentX += this.BlockSize;
-                            if (currentX > (int)(Drawing.ThreadSafeWidth - this.BlockSize))
+                            currentX += BlockSize;
+                            if (currentX > (int)(ThreadSafeWidth - BlockSize))
                             {
                                 // move to next y-line
                                 currentX = 0;
-                                currentY += this.BlockSize;
+                                currentY += BlockSize;
                             }
                             numFree3 = 0;
                         }
@@ -408,14 +396,14 @@ namespace Little_Disk_Defrag
 
                 // Move to the next block
                 currLcn = BitmapBuffer.StartingLcn.QuadPart + i;
-            } while ((err == PInvoke.ERROR_MORE_DATA) && (currLcn < this.Volume.PartInfo.ClusterCount));
+            } while ((err == PInvoke.ERROR_MORE_DATA) && (currLcn < Volume.PartInfo.ClusterCount));
 
             if (clusterCount > 0)
             {
                 //cFreeSpaceGaps++;
 
                 // draw last cluster
-                if (this.BlockSize > 1)
+                if (BlockSize > 1)
                 {
                     DrawNoBlockBound(currentX, currentY);
                     if (numFree3 == clusterCount)
@@ -425,7 +413,7 @@ namespace Little_Disk_Defrag
                     else
                     {
                         if (numFree3 > 0) {
-                            uint col = Utils.LighterVal(ColFile, (int)(((float)((int)(this.clustersPerBlock - (this.clustersPerBlock - numFree3))) / (int)this.clustersPerBlock) * 255.0));
+                            uint col = Utils.LighterVal(ColFile, (int)(((float)((int)(clustersPerBlock - (clustersPerBlock - numFree3))) / (int)clustersPerBlock) * 255.0));
                             DrawBlockAt(currentX, currentY, col);
                         }
                         else
@@ -445,24 +433,24 @@ namespace Little_Disk_Defrag
             }
 
             // Update window
-            if (this.Dispatcher.Thread != Thread.CurrentThread)
+            if (Dispatcher.Thread != Thread.CurrentThread)
             {
-                this.Dispatcher.Invoke(new Action(() => this.draw.InvalidateVisual()));
+                Dispatcher.Invoke(() => draw.InvalidateVisual());
             }
             else
             {
-                this.draw.InvalidateVisual();
+                draw.InvalidateVisual();
             }
         }
 
         private double GetWidth()
         {
-            if (this.Dispatcher.Thread != Thread.CurrentThread)
+            if (Dispatcher.Thread != Thread.CurrentThread)
             {
-                return (double)this.Dispatcher.Invoke(new Func<double>(this.GetWidth));
+                return Dispatcher.Invoke(new Func<double>(GetWidth));
             }
 
-            return this.Width;
+            return Width;
         }
 
         public void DrawClustersAt(int x1, int y1, int x2, int y2, uint color)
@@ -473,43 +461,43 @@ namespace Little_Disk_Defrag
 
             while (y1 < y2)
             {
-                width = this.BlockSize - 1;
-                height = y1 * this.BlockSize + this.BlockSize;
+                width = BlockSize - 1;
+                height = y1 * BlockSize + BlockSize;
 
-                if (this.BlockSize > 1)
+                if (BlockSize > 1)
                     height -= 1;
 
-                this.AddBlock(x1, y1 * this.BlockSize, width, height, color);
+                AddBlock(x1, y1 * BlockSize, width, height, color);
 
                 x1 = 0;
                 y1++;
             }
 
             width = x2;
-            height = y2 * (this.BlockSize * 2);
+            height = y2 * (BlockSize * 2);
 
-            if (this.BlockSize > 1) 
+            if (BlockSize > 1) 
                 height -= 1;
 
-            this.AddBlock(x1, y1 * this.BlockSize, width, height, color);
+            AddBlock(x1, y1 * BlockSize, width, height, color);
         }
 
         public void DrawBlockAt(int x, int y, uint color)
         {
-            this.AddBlock(x+1, y+1, this.BlockSize - 1, this.BlockSize, color);
+            AddBlock(x+1, y+1, BlockSize - 1, BlockSize, color);
         }
 
         private void DrawNoBlockBound(int x, int y)
         {
-            if (this.BlockSize == 1)
+            if (BlockSize == 1)
                 return;
 
-            this.AddBlock(x, y, x + this.BlockSize - 1, y + this.BlockSize - 1, ColBG);
+            AddBlock(x, y, x + BlockSize - 1, y + BlockSize - 1, ColBG);
         }
 
         private void DrawBlockBound(int x, int y)
         {
-            this.AddBlock(x, y, (x + this.BlockSize - 1) + 2, (y + this.BlockSize - 1) + 2, ColBG);
+            AddBlock(x, y, (x + BlockSize - 1) + 2, (y + BlockSize - 1) + 2, ColBG);
         }
 
         private void DrawBlockBounds(ulong clusterStart, ulong clusterEnd, bool clear)
@@ -518,36 +506,36 @@ namespace Little_Disk_Defrag
             ulong x = 0;
             ulong y = 0;
 
-            if (clusterStart > this.Volume.PartInfo.ClusterCount && clusterEnd > this.Volume.PartInfo.ClusterCount)
+            if (clusterStart > Volume.PartInfo.ClusterCount && clusterEnd > Volume.PartInfo.ClusterCount)
                 return;
-            if (clusterStart > this.Volume.PartInfo.ClusterCount) 
+            if (clusterStart > Volume.PartInfo.ClusterCount) 
                 return;
 
-            if (clusterEnd > this.Volume.PartInfo.ClusterCount)
-                clusterEnd = this.Volume.PartInfo.ClusterCount;
+            if (clusterEnd > Volume.PartInfo.ClusterCount)
+                clusterEnd = Volume.PartInfo.ClusterCount;
 
-            while (y / (ulong)this.BlockSize * this.clustersPerLine <= clusterStart)
-                y += (ulong)this.BlockSize;
-            y -= (ulong)this.BlockSize;
+            while (y / (ulong)BlockSize * clustersPerLine <= clusterStart)
+                y += (ulong)BlockSize;
+            y -= (ulong)BlockSize;
 
-            while (x / (ulong)this.BlockSize * this.clustersPerBlock + y / (ulong)this.BlockSize * this.clustersPerLine <= clusterStart)
-                x += (ulong)this.BlockSize;
-            x -= (ulong)this.BlockSize;
+            while (x / (ulong)BlockSize * clustersPerBlock + y / (ulong)BlockSize * clustersPerLine <= clusterStart)
+                x += (ulong)BlockSize;
+            x -= (ulong)BlockSize;
 
             if (!clear) 
                 DrawBlockBound((int)x, (int)y);
             else 
                 DrawNoBlockBound((int)x, (int)y);
 
-            clusterStart += this.clustersPerBlock;
+            clusterStart += clustersPerBlock;
 
-            for (ui = clusterStart; ui <= clusterEnd; ui += this.clustersPerBlock)
+            for (ui = clusterStart; ui <= clusterEnd; ui += clustersPerBlock)
             {
-                x += (ulong)this.BlockSize;
-                if (x > Drawing.ThreadSafeWidth - this.BlockSize) 
+                x += (ulong)BlockSize;
+                if (x > ThreadSafeWidth - BlockSize) 
                 { 
                     x = 0; 
-                    y += (ulong)this.BlockSize; 
+                    y += (ulong)BlockSize; 
                 }
                 
                 if (clear) 
@@ -566,21 +554,21 @@ namespace Little_Disk_Defrag
             int x2 = 0;
             int y2 = 0;
 
-            if (this.Volume.PartInfo.ClusterCount == 0 || clusterEnd == 0) 
+            if (Volume.PartInfo.ClusterCount == 0 || clusterEnd == 0) 
                 return;
 
-            if (clusterStart > this.Volume.PartInfo.ClusterCount) 
+            if (clusterStart > Volume.PartInfo.ClusterCount) 
                 return;
 
-            if (clusterEnd > this.Volume.PartInfo.ClusterCount)
-                clusterEnd = this.Volume.PartInfo.ClusterCount;
+            if (clusterEnd > Volume.PartInfo.ClusterCount)
+                clusterEnd = Volume.PartInfo.ClusterCount;
 
-            if (this.BlockSize == 1)
+            if (BlockSize == 1)
             {
-                x1 = this.BlockSize * (int)((clusterStart - clusterStart / this.clustersPerLine * this.clustersPerLine) / this.clustersPerBlock);
-                y1 = (this.BlockSize * (int)(clusterStart / this.clustersPerLine)) / this.BlockSize;
-                x2 = this.BlockSize * (int)((clusterEnd - clusterEnd / this.clustersPerLine * this.clustersPerLine) / this.clustersPerBlock);
-                y2 = (this.BlockSize * (int)(clusterEnd / this.clustersPerLine)) / this.BlockSize;
+                x1 = BlockSize * (int)((clusterStart - clusterStart / clustersPerLine * clustersPerLine) / clustersPerBlock);
+                y1 = (BlockSize * (int)(clusterStart / clustersPerLine)) / BlockSize;
+                x2 = BlockSize * (int)((clusterEnd - clusterEnd / clustersPerLine * clustersPerLine) / clustersPerBlock);
+                y2 = (BlockSize * (int)(clusterEnd / clustersPerLine)) / BlockSize;
 
                 if (x1 == lastx1)
                     //  && x2-x1>1 && y2-y1==0
@@ -596,17 +584,17 @@ namespace Little_Disk_Defrag
             else
             {
                 // find the start coords
-                x1 = (int)this.BlockSize * (int)((clusterStart - clusterStart / this.clustersPerLine * this.clustersPerLine) / this.clustersPerBlock);
-                y1 = ((int)this.BlockSize * (int)(clusterStart / this.clustersPerLine));
+                x1 = BlockSize * (int)((clusterStart - clusterStart / clustersPerLine * clustersPerLine) / clustersPerBlock);
+                y1 = (BlockSize * (int)(clusterStart / clustersPerLine));
 
                 DrawBlockAt(x1, y1, color);
-                for (ui = clusterStart; ui + (this.clustersPerBlock) <= clusterEnd; ui += this.clustersPerBlock)
+                for (ui = clusterStart; ui + (clustersPerBlock) <= clusterEnd; ui += clustersPerBlock)
                 {
-                    x1 += this.BlockSize;
-                    if (x1 > this.Width - this.BlockSize)
+                    x1 += BlockSize;
+                    if (x1 > Width - BlockSize)
                     {
                         x1 = 0;
-                        y1 += (int)this.BlockSize;
+                        y1 += BlockSize;
                     }
 
                     DrawBlockAt(x1, y1, color);
@@ -622,58 +610,58 @@ namespace Little_Disk_Defrag
             int y1 = 0;
             int x2 = 0;
             int y2 = 0;
-            int h = (int)this.Height;
-            int w = (int)this.Width;
+            int h = (int)Height;
+            int w = (int)Width;
 
-            if (this.BlockSize < 5) 
+            if (BlockSize < 5) 
                 return;
-            if (this.Volume.PartInfo.ClusterCount == 0 || clusterEnd == 0) 
+            if (Volume.PartInfo.ClusterCount == 0 || clusterEnd == 0) 
                 return;
-            if (clusterStart > this.Volume.PartInfo.ClusterCount && clusterEnd > this.Volume.PartInfo.ClusterCount) 
+            if (clusterStart > Volume.PartInfo.ClusterCount && clusterEnd > Volume.PartInfo.ClusterCount) 
                 return;
-            if (clusterStart > this.Volume.PartInfo.ClusterCount) 
+            if (clusterStart > Volume.PartInfo.ClusterCount) 
                 return;
-            if (clusterEnd > this.Volume.PartInfo.ClusterCount)
-                clusterEnd = this.Volume.PartInfo.ClusterCount;
+            if (clusterEnd > Volume.PartInfo.ClusterCount)
+                clusterEnd = Volume.PartInfo.ClusterCount;
 
-            if (this.BlockSize == 1)
+            if (BlockSize == 1)
             {
-                x1 = this.BlockSize * (int)((clusterStart - clusterStart / this.clustersPerLine * this.clustersPerLine) / this.clustersPerBlock);
-                y1 = (this.BlockSize * (int)(clusterStart / this.clustersPerLine)) / this.BlockSize;
-                x2 = this.BlockSize * (int)((clusterEnd - clusterEnd / this.clustersPerLine * this.clustersPerLine) / this.clustersPerBlock);
-                y2 = (this.BlockSize * (int)(clusterEnd / this.clustersPerLine)) / this.BlockSize;
+                x1 = BlockSize * (int)((clusterStart - clusterStart / clustersPerLine * clustersPerLine) / clustersPerBlock);
+                y1 = (BlockSize * (int)(clusterStart / clustersPerLine)) / BlockSize;
+                x2 = BlockSize * (int)((clusterEnd - clusterEnd / clustersPerLine * clustersPerLine) / clustersPerBlock);
+                y2 = (BlockSize * (int)(clusterEnd / clustersPerLine)) / BlockSize;
                 DrawClusterMarkAt(x1 + 1, y1, x2, y2, ColMarks);
             }
             else
             {
-                while ((ulong)y1 / (ulong)this.BlockSize * this.clustersPerLine <= clusterStart)
-                    y1 += this.BlockSize;
-                y1 -= this.BlockSize;
+                while ((ulong)y1 / (ulong)BlockSize * clustersPerLine <= clusterStart)
+                    y1 += BlockSize;
+                y1 -= BlockSize;
 
-                while ((ulong)x1 / (ulong)this.BlockSize * this.clustersPerBlock + (ulong)y1 / (ulong)this.BlockSize * this.clustersPerLine <= clusterStart)
-                    x1 += this.BlockSize;
-                x1 -= this.BlockSize;
+                while ((ulong)x1 / (ulong)BlockSize * clustersPerBlock + (ulong)y1 / (ulong)BlockSize * clustersPerLine <= clusterStart)
+                    x1 += BlockSize;
+                x1 -= BlockSize;
 
                 DrawMarkAt(x1, y1, false); // start mark
-                clusterStart += this.clustersPerBlock;
+                clusterStart += clustersPerBlock;
 
-                for (ui = clusterStart; ui + (this.clustersPerBlock) <= clusterEnd; ui += this.clustersPerBlock)
+                for (ui = clusterStart; ui + (clustersPerBlock) <= clusterEnd; ui += clustersPerBlock)
                 {
-                    x1 += this.BlockSize;
-                    if (x1 > this.Width - this.BlockSize) 
+                    x1 += BlockSize;
+                    if (x1 > Width - BlockSize) 
                     { 
                         x1 = 0; 
-                        y1 += this.BlockSize; 
+                        y1 += BlockSize; 
                     }
                     DrawMarkLineAt(x1, y1);
                 }
 
-                x1 += this.BlockSize;
+                x1 += BlockSize;
 
-                if (x1 > this.Width - this.BlockSize) 
+                if (x1 > Width - BlockSize) 
                 {
                     x1 = 0; 
-                    y1 += this.BlockSize; 
+                    y1 += BlockSize; 
                 }
 
                 DrawMarkAt(x1, y1, true); // end mark
@@ -683,20 +671,20 @@ namespace Little_Disk_Defrag
         private void DrawClusterMarkAt(int x1, int y1, int x2, int y2, uint col) 
         {
             // Perpendicular
-            this.AddLine(x1, y1 * this.BlockSize, x1, y1 * this.BlockSize + this.BlockSize - 2, col);
+            AddLine(x1, y1 * BlockSize, x1, y1 * BlockSize + BlockSize - 2, col);
 
             while (y1 < y2)
             {
-                this.AddLine(x1, y1 * this.BlockSize + this.BlockSize / 2 - 1, this.Width - 1, y1 * this.BlockSize + this.BlockSize / 2 - 1, col);
+                AddLine(x1, y1 * BlockSize + BlockSize / 2 - 1, Width - 1, y1 * BlockSize + BlockSize / 2 - 1, col);
 
                 x1 = 0;
                 y1++;
             }
 
-            this.AddLine(x1, y2 * this.BlockSize + this.BlockSize / 2 - 1, x2, y2 * this.BlockSize + this.BlockSize / 2 - 1, col);
+            AddLine(x1, y2 * BlockSize + BlockSize / 2 - 1, x2, y2 * BlockSize + BlockSize / 2 - 1, col);
 
             // Perpendicular
-            this.AddLine(x2, y2 * this.BlockSize + 1, x2, y2 * this.BlockSize + this.BlockSize - 2, col);
+            AddLine(x2, y2 * BlockSize + 1, x2, y2 * BlockSize + BlockSize - 2, col);
         }
 
         private void DrawMarkLineAt(int x, int y)
@@ -704,8 +692,8 @@ namespace Little_Disk_Defrag
             x++;
             y++;
 
-            this.AddLine(x, y + this.BlockSize / 2 - 1, x + this.BlockSize - 1, y + this.BlockSize / 2 - 1, ColMarks);
-            this.AddLine(x, y + this.BlockSize / 2 - 1, x + this.BlockSize - 1, y + this.BlockSize / 2 - 1, ColMarks);
+            AddLine(x, y + BlockSize / 2 - 1, x + BlockSize - 1, y + BlockSize / 2 - 1, ColMarks);
+            AddLine(x, y + BlockSize / 2 - 1, x + BlockSize - 1, y + BlockSize / 2 - 1, ColMarks);
         }
 
         private void DrawMarkAt(int x, int y, bool start)
@@ -714,46 +702,46 @@ namespace Little_Disk_Defrag
             y++;
 
             // vertically centered
-            this.AddLine(x + this.BlockSize / 2 - 1, y + 1, x + this.BlockSize / 2 - 1, y + this.BlockSize - 2, ColMarks);
+            AddLine(x + BlockSize / 2 - 1, y + 1, x + BlockSize / 2 - 1, y + BlockSize - 2, ColMarks);
             // vertically centered
-            this.AddLine(x + this.BlockSize / 2 - 1, y + 1, x + this.BlockSize / 2 - 1, y + this.BlockSize - 2, ColMarks);
+            AddLine(x + BlockSize / 2 - 1, y + 1, x + BlockSize / 2 - 1, y + BlockSize - 2, ColMarks);
 
             if (start)
             {
                 // horizontally center to right |-
-                this.AddLine(x, y + this.BlockSize / 2 - 1, x + this.BlockSize / 2 - 1, y + this.BlockSize / 2 - 1, ColMarks);
+                AddLine(x, y + BlockSize / 2 - 1, x + BlockSize / 2 - 1, y + BlockSize / 2 - 1, ColMarks);
                 // horizontally center to right |-
-                this.AddLine(x, y + this.BlockSize / 2 - 1, x + this.BlockSize / 2 - 1, y + this.BlockSize / 2 - 1, ColMarks);
+                AddLine(x, y + BlockSize / 2 - 1, x + BlockSize / 2 - 1, y + BlockSize / 2 - 1, ColMarks);
             }
             else
             {
                 // horizontally left to center -|
-                this.AddLine(x + this.BlockSize / 2 - 1, y + this.BlockSize / 2 - 1, x + this.BlockSize - 1, y + this.BlockSize / 2 - 1, ColMarks);
+                AddLine(x + BlockSize / 2 - 1, y + BlockSize / 2 - 1, x + BlockSize - 1, y + BlockSize / 2 - 1, ColMarks);
                 // horizontally left to center -|
-                this.AddLine(x + this.BlockSize / 2 - 1, y + this.BlockSize / 2 - 1, x + this.BlockSize - 1, y + this.BlockSize / 2 - 1, ColMarks);
+                AddLine(x + BlockSize / 2 - 1, y + BlockSize / 2 - 1, x + BlockSize - 1, y + BlockSize / 2 - 1, ColMarks);
             }
         }
 
         private void AddLine(double startX, double startY, double endX, double endY, uint color)
         {
-            if (this.Dispatcher.Thread != Thread.CurrentThread)
+            if (Dispatcher.Thread != Thread.CurrentThread)
             {
-                this.Dispatcher.Invoke(new Action<double, double, double, double, uint>(this.AddBlock), startX, startY, endX, endY, color);
+                Dispatcher.Invoke(new Action<double, double, double, double, uint>(AddBlock), startX, startY, endX, endY, color);
                 return;
             }
 
-            this.draw.DrawLine(startX, startY, endX, endY, color);
+            draw.DrawLine(startX, startY, endX, endY, color);
         }
 
         private void AddBlock(double left, double top, double width, double height, uint color)
         {
-            if (this.Dispatcher.Thread != Thread.CurrentThread)
+            if (Dispatcher.Thread != Thread.CurrentThread)
             {
-                this.Dispatcher.Invoke(new Action<double, double, double, double, uint>(this.AddBlock), left, top, width, height, color);
+                Dispatcher.Invoke(new Action<double, double, double, double, uint>(AddBlock), left, top, width, height, color);
                 return;
             }
 
-            this.draw.DrawBlock(left, top, width, height, color);
+            draw.DrawBlock(left, top, width, height, color);
         }
 
     }

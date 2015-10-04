@@ -17,10 +17,6 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Little_Disk_Defrag.Helpers
 {
@@ -29,45 +25,45 @@ namespace Little_Disk_Defrag.Helpers
         private readonly Defragment _defrag;
         private readonly DriveVolume _volume;
         private readonly UInt64 _clusterCount;
-        private UInt64 _clusterProgress = 0;
+        private UInt64 _clusterProgress;
 
         public Defragment Defrag
         {
-            get { return this._defrag; }
+            get { return _defrag; }
         }
 
         public DriveVolume Volume
         {
-            get { return this._volume; }
+            get { return _volume; }
         }
 
         public double Percent
         {
-            get { return this.Defrag.StatusPercent; }
-            set { this.Defrag.StatusPercent = value; }
+            get { return Defrag.StatusPercent; }
+            set { Defrag.StatusPercent = value; }
         }
         public bool QuitMonitor
         {
-            get { return this.Defrag.PleaseStop; }
-            set { this.Defrag.PleaseStop = value; }
+            get { return Defrag.PleaseStop; }
+            set { Defrag.PleaseStop = value; }
         }
 
         public UInt64 ClusterCount
         {
-            get { return this._clusterCount; }
+            get { return _clusterCount; }
         }
 
         public UInt64 ClusterProgress
         {
-            get { return this._clusterProgress; }
-            set { this._clusterProgress = value; }
+            get { return _clusterProgress; }
+            set { _clusterProgress = value; }
         }
 
         public BuildDBInfo(Defragment defrag, DriveVolume volume, UInt64 clusterCount)
         {
-            this._defrag = defrag;
-            this._volume = volume;
-            this._clusterCount = clusterCount;
+            _defrag = defrag;
+            _volume = volume;
+            _clusterCount = clusterCount;
         }
     }
 }

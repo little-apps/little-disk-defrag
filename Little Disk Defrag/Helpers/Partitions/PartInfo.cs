@@ -1,9 +1,7 @@
-﻿using Little_Disk_Defrag.Misc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using Little_Disk_Defrag.Misc;
 
 namespace Little_Disk_Defrag.Helpers.Partitions
 {
@@ -28,85 +26,85 @@ namespace Little_Disk_Defrag.Helpers.Partitions
 
         public string Name
         {
-            get { return this._name; }
-            set { this._name = value; }
+            get { return _name; }
+            set { _name = value; }
         }
         public string Serial
         {
-            get { return this._serial; }
-            set { this._serial = value; }
+            get { return _serial; }
+            set { _serial = value; }
         }
         public ulong MaxNameLen
         {
-            get { return this._maxNameLen; }
-            set { this._maxNameLen = value; }
+            get { return _maxNameLen; }
+            set { _maxNameLen = value; }
         }
         public string FileSystem
         {
-            get { return this._fileSystem; }
-            set { this._fileSystem = value; }
+            get { return _fileSystem; }
+            set { _fileSystem = value; }
         }
         public UInt64 ClusterCount
         {
-            get { return this._clusterCount; }
-            set { this._clusterCount = value; }
+            get { return _clusterCount; }
+            set { _clusterCount = value; }
         }
         public uint ClusterSize
         {
-            get { return this._clusterSize; }
-            set { this._clusterSize = value; }
+            get { return _clusterSize; }
+            set { _clusterSize = value; }
         }
         public UInt64 TotalBytes
         {
-            get { return this._totalBytes; }
-            set { this._totalBytes = value; }
+            get { return _totalBytes; }
+            set { _totalBytes = value; }
         }
         public UInt64 FreeBytes
         {
-            get { return this._freeBytes; }
-            set { this._freeBytes = value; }
+            get { return _freeBytes; }
+            set { _freeBytes = value; }
         }
 
         public uint SectorsPerCluster
         {
-            get { return this._sectorsPerCluster; }
-            set { this._sectorsPerCluster = value; }
+            get { return _sectorsPerCluster; }
+            set { _sectorsPerCluster = value; }
         }
         public ulong BytesPerCluster
         {
-            get { return this._bytesPerCluster; }
-            set { this._bytesPerCluster = value; }
+            get { return _bytesPerCluster; }
+            set { _bytesPerCluster = value; }
         }
         public uint BytesPerSector
         {
-            get { return this._bytesPerSector; }
-            set { this._bytesPerSector = value; }
+            get { return _bytesPerSector; }
+            set { _bytesPerSector = value; }
         }
         public uint FreeClusters
         {
-            get { return this._freeClusters; }
-            set { this._freeClusters = value; }
+            get { return _freeClusters; }
+            set { _freeClusters = value; }
         }
         public uint TotalSectors
         {
-            get { return this._totalSectors; }
-            set { this._totalSectors = value; }
+            get { return _totalSectors; }
+            set { _totalSectors = value; }
         }
 
         public uint TotalClusters
         {
-            get { return this._totalClusters; }
-            set { this._totalClusters = value; }
+            get { return _totalClusters; }
+            set { _totalClusters = value; }
         }
 
         public DriveVolume Volume
         {
-            get { return this._vol; }
+            get { return _vol; }
         }
 
         public PartInfo(DriveVolume volume)
         {
-            this._vol = volume;
+            _vol = volume;
         }
 
         public bool GetPartitionInfo()
@@ -121,21 +119,21 @@ namespace Little_Disk_Defrag.Helpers.Partitions
             uint BytesGot;
             UInt64 nan;
 
-            Result = PInvoke.GetVolumeInformation(this.Volume.RootPath, VolName, VolName.Capacity, out VolSN, out VolMaxFileLen, out FSFlags, FSName, FSName.Capacity);
+            Result = PInvoke.GetVolumeInformation(Volume.RootPath, VolName, VolName.Capacity, out VolSN, out VolMaxFileLen, out FSFlags, FSName, FSName.Capacity);
 
             if (Result)
             {
-                this.FileSystem = FSName.ToString();
-                this.MaxNameLen = VolMaxFileLen;
-                this.Name = VolName.ToString();
-                this.Serial = string.Format("{0:X}-{1:X}", (VolSN & 0xffff0000) >> 16, VolSN & 0x0000ffff);
+                FileSystem = FSName.ToString();
+                MaxNameLen = VolMaxFileLen;
+                Name = VolName.ToString();
+                Serial = string.Format("{0:X}-{1:X}", (VolSN & 0xffff0000) >> 16, VolSN & 0x0000ffff);
             }
             else
             {
-                this.FileSystem = "(Unknown)";
-                this.MaxNameLen = 255;
-                this.Name = "(Unknown)";
-                this.Serial = "(Unknown)";
+                FileSystem = "(Unknown)";
+                MaxNameLen = 255;
+                Name = "(Unknown)";
+                Serial = "(Unknown)";
             }
 
             int GeometrySize = Marshal.SizeOf(typeof(PInvoke.DISK_GEOMETRY));
@@ -143,7 +141,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
 
             BytesGot = 0;
             Result = PInvoke.DeviceIoControl(
-                this.Volume.Handle,
+                Volume.Handle,
                 PInvoke.FSConstants.IOCTL_DISK_GET_DRIVE_GEOMETRY,
                 IntPtr.Zero,
                 0,
@@ -157,7 +155,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
             if (!Result)
                 return false;
 
-            this.Volume.Geometry = (PInvoke.DISK_GEOMETRY)Marshal.PtrToStructure(GeometryPtr, typeof(PInvoke.DISK_GEOMETRY));
+            Volume.Geometry = (PInvoke.DISK_GEOMETRY)Marshal.PtrToStructure(GeometryPtr, typeof(PInvoke.DISK_GEOMETRY));
 
             uint SectorsPerCluster;
             uint BytesPerSector;
@@ -165,7 +163,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
             uint TotalClusters;
 
             Result = PInvoke.GetDiskFreeSpace(
-                this.Volume.RootPath,
+                Volume.RootPath,
                 out SectorsPerCluster,
                 out BytesPerSector,
                 out FreeClusters,
@@ -181,19 +179,19 @@ namespace Little_Disk_Defrag.Helpers.Partitions
             if (!Result)
                 return (false);
 
-            this.ClusterSize = SectorsPerCluster * BytesPerSector;
+            ClusterSize = SectorsPerCluster * BytesPerSector;
 
             ulong totalBytes, freeBytes;
 
             Result = PInvoke.GetDiskFreeSpaceEx(
-                this.Volume.RootPath,
+                Volume.RootPath,
                 out nan,
                 out totalBytes,
                 out freeBytes
             );
 
-            this.TotalBytes = totalBytes;
-            this.FreeBytes = freeBytes;
+            TotalBytes = totalBytes;
+            FreeBytes = freeBytes;
 
             return true;
         }

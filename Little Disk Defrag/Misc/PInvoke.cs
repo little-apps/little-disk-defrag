@@ -16,14 +16,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Microsoft.Win32.SafeHandles;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
+using Little_Disk_Defrag.Helpers.Partitions;
+using Microsoft.Win32.SafeHandles;
 
 namespace Little_Disk_Defrag.Misc
 {
@@ -89,7 +89,7 @@ namespace Little_Disk_Defrag.Misc
         internal static extern SafeFileHandle CreateFile(string lpFileName, uint dwDesiredAccess, uint dwShareMode, IntPtr lpSecurityAttributes, uint dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern bool ReadFile(SafeFileHandle hFile, [Out] IntPtr lpBuffer, uint nNumberOfBytesToRead, out uint lpNumberOfBytesRead, [In] ref System.Threading.NativeOverlapped lpOverlapped);
+        internal static extern bool ReadFile(SafeFileHandle hFile, [Out] IntPtr lpBuffer, uint nNumberOfBytesToRead, out uint lpNumberOfBytesRead, [In] ref NativeOverlapped lpOverlapped);
 
         [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         internal static extern int SetFilePointer(SafeFileHandle handle, int lDistanceToMove, out int lpDistanceToMoveHigh, uint dwMoveMethod);
@@ -159,7 +159,7 @@ namespace Little_Disk_Defrag.Misc
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct WIN32_FIND_DATA
         {
-            public System.IO.FileAttributes dwFileAttributes;
+            public FileAttributes dwFileAttributes;
             public FILETIME ftCreationTime;
             public FILETIME ftLastAccessTime;
             public FILETIME ftLastWriteTime;
@@ -196,8 +196,8 @@ namespace Little_Disk_Defrag.Misc
 
             public VOLUME_BITMAP_BUFFER(IntPtr pBitmap, bool getBuffer)
             {
-                StartingLcn = (PInvoke.LARGE_INTEGER)Marshal.PtrToStructure(pBitmap, typeof(PInvoke.LARGE_INTEGER));
-                BitmapSize = (PInvoke.LARGE_INTEGER)Marshal.PtrToStructure(IntPtr.Add(pBitmap, 8), typeof(PInvoke.LARGE_INTEGER));
+                StartingLcn = (LARGE_INTEGER)Marshal.PtrToStructure(pBitmap, typeof(LARGE_INTEGER));
+                BitmapSize = (LARGE_INTEGER)Marshal.PtrToStructure(IntPtr.Add(pBitmap, 8), typeof(LARGE_INTEGER));
 
                 if (getBuffer)
                 {
@@ -214,8 +214,8 @@ namespace Little_Disk_Defrag.Misc
 
             public VOLUME_BITMAP_BUFFER(IntPtr pBitmap, int bufferSize)
             {
-                StartingLcn = (PInvoke.LARGE_INTEGER)Marshal.PtrToStructure(pBitmap, typeof(PInvoke.LARGE_INTEGER));
-                BitmapSize = (PInvoke.LARGE_INTEGER)Marshal.PtrToStructure(IntPtr.Add(pBitmap, 8), typeof(PInvoke.LARGE_INTEGER));
+                StartingLcn = (LARGE_INTEGER)Marshal.PtrToStructure(pBitmap, typeof(LARGE_INTEGER));
+                BitmapSize = (LARGE_INTEGER)Marshal.PtrToStructure(IntPtr.Add(pBitmap, 8), typeof(LARGE_INTEGER));
 
                 Buffer = new byte[bufferSize];
 
@@ -260,11 +260,11 @@ namespace Little_Disk_Defrag.Misc
             {
                 int i;
 
-                this.BS_jmpBoot = new byte[3];
+                BS_jmpBoot = new byte[3];
 
                 for (i = 0; i < 3; i++)
                 {
-                    this.BS_jmpBoot[i] = Marshal.ReadByte(ptr);
+                    BS_jmpBoot[i] = Marshal.ReadByte(ptr);
                     ptr = IntPtr.Add(ptr, 1);
                 }
 
@@ -277,48 +277,48 @@ namespace Little_Disk_Defrag.Misc
                     ptr = IntPtr.Add(ptr, 1);
                 }
 
-                this.BS_OEMName = oemInfo.ToString();
+                BS_OEMName = oemInfo.ToString();
 
-                this.BytesPerSector = (ushort)Marshal.ReadInt16(ptr);
+                BytesPerSector = (ushort)Marshal.ReadInt16(ptr);
                 ptr = IntPtr.Add(ptr, 2);
 
-                this.SectorsPerCluster = Marshal.ReadByte(ptr);
+                SectorsPerCluster = Marshal.ReadByte(ptr);
                 ptr = IntPtr.Add(ptr, 1);
 
-                this.ReservedSectors = (ushort)Marshal.ReadInt16(ptr);
+                ReservedSectors = (ushort)Marshal.ReadInt16(ptr);
                 ptr = IntPtr.Add(ptr, 2);
 
-                this.NumberOfFATs = Marshal.ReadByte(ptr);
+                NumberOfFATs = Marshal.ReadByte(ptr);
                 ptr = IntPtr.Add(ptr, 1);
 
-                this.RootEntries = (ushort)Marshal.ReadInt16(ptr);
+                RootEntries = (ushort)Marshal.ReadInt16(ptr);
                 ptr = IntPtr.Add(ptr, 2);
 
-                this.TotalSectors16 = (ushort)Marshal.ReadInt16(ptr);
+                TotalSectors16 = (ushort)Marshal.ReadInt16(ptr);
                 ptr = IntPtr.Add(ptr, 2);
 
-                this.MediaDescriptor = Marshal.ReadByte(ptr);
+                MediaDescriptor = Marshal.ReadByte(ptr);
                 ptr = IntPtr.Add(ptr, 1);
 
-                this.SectorsPerFAT = (ushort)Marshal.ReadInt16(ptr);
+                SectorsPerFAT = (ushort)Marshal.ReadInt16(ptr);
                 ptr = IntPtr.Add(ptr, 2);
 
-                this.SectorsPerTrack = (ushort)Marshal.ReadInt16(ptr);
+                SectorsPerTrack = (ushort)Marshal.ReadInt16(ptr);
                 ptr = IntPtr.Add(ptr, 2);
 
-                this.Heads = (ushort)Marshal.ReadInt16(ptr);
+                Heads = (ushort)Marshal.ReadInt16(ptr);
                 ptr = IntPtr.Add(ptr, 2);
 
-                this.HiddenSectors = (uint)Marshal.ReadInt32(ptr);
+                HiddenSectors = (uint)Marshal.ReadInt32(ptr);
                 ptr = IntPtr.Add(ptr, 4);
 
-                this.TotalSectors32 = (uint)Marshal.ReadInt32(ptr);
+                TotalSectors32 = (uint)Marshal.ReadInt32(ptr);
                 ptr = IntPtr.Add(ptr, 4);
 
-                this.FAT1632Info = new PInvoke.FAT1632Info(ptr);
+                FAT1632Info = new FAT1632Info(ptr);
                 ptr = IntPtr.Add(ptr, 474);
 
-                this.Signature = (ushort)Marshal.ReadInt16(ptr);
+                Signature = (ushort)Marshal.ReadInt16(ptr);
                 ptr = IntPtr.Add(ptr, 2);
             }
         }
@@ -357,16 +357,16 @@ namespace Little_Disk_Defrag.Misc
                 IntPtr startPtr = ptr;
 
                 // FAT 16
-                this.FAT16_LogicalDriveNumber = Marshal.ReadByte(ptr); // 0
+                FAT16_LogicalDriveNumber = Marshal.ReadByte(ptr); // 0
                 ptr = IntPtr.Add(ptr, 1);
 
-                this.FAT16_Reserved1 = Marshal.ReadByte(ptr); // 1
+                FAT16_Reserved1 = Marshal.ReadByte(ptr); // 1
                 ptr = IntPtr.Add(ptr, 1);
 
-                this.FAT16_ExtendedSignature = Marshal.ReadByte(ptr); // 2
+                FAT16_ExtendedSignature = Marshal.ReadByte(ptr); // 2
                 ptr = IntPtr.Add(ptr, 1);
 
-                this.FAT16_PartitionSerialNumber = (uint)Marshal.ReadInt32(ptr); // 3
+                FAT16_PartitionSerialNumber = (uint)Marshal.ReadInt32(ptr); // 3
                 ptr = IntPtr.Add(ptr, 4);
 
                 StringBuilder volName16 = new StringBuilder(11);
@@ -379,7 +379,7 @@ namespace Little_Disk_Defrag.Misc
                     ptr = IntPtr.Add(ptr, 1);
                 }
 
-                this.FAT16_VolumeName = volName16.ToString();
+                FAT16_VolumeName = volName16.ToString();
 
                 StringBuilder fileSystemType16 = new StringBuilder(8);
 
@@ -391,55 +391,55 @@ namespace Little_Disk_Defrag.Misc
                     ptr = IntPtr.Add(ptr, 1);
                 }
 
-                this.FAT16_FSType = fileSystemType16.ToString();
+                FAT16_FSType = fileSystemType16.ToString();
 
-                this.FAT16_Reserved2 = new byte[448];
+                FAT16_Reserved2 = new byte[448];
 
                 for (i = 0; i < 448; i++)
                 {
-                    this.FAT16_Reserved2[i] = Marshal.ReadByte(ptr);
+                    FAT16_Reserved2[i] = Marshal.ReadByte(ptr);
                     ptr = IntPtr.Add(ptr, 1);
                 }
 
                 // FAT32
                 ptr = startPtr;
 
-                this.FAT32_SectorsPerFAT32 = (uint)Marshal.ReadInt32(ptr); // 36, 4
+                FAT32_SectorsPerFAT32 = (uint)Marshal.ReadInt32(ptr); // 36, 4
                 ptr = IntPtr.Add(ptr, 4);
 
-                this.FAT32_ExtFlags = (ushort)Marshal.ReadInt16(ptr); // 40, 2
+                FAT32_ExtFlags = (ushort)Marshal.ReadInt16(ptr); // 40, 2
                 ptr = IntPtr.Add(ptr, 2);
 
-                this.FAT32_FSVer = (ushort)Marshal.ReadInt16(ptr); // 42, 2
+                FAT32_FSVer = (ushort)Marshal.ReadInt16(ptr); // 42, 2
                 ptr = IntPtr.Add(ptr, 2);
 
-                this.FAT32_RootDirStart = (uint)Marshal.ReadInt32(ptr); // 44, 4
+                FAT32_RootDirStart = (uint)Marshal.ReadInt32(ptr); // 44, 4
                 ptr = IntPtr.Add(ptr, 4);
 
-                this.FAT32_FSInfoSector = (ushort)Marshal.ReadInt16(ptr); // 48, 2
+                FAT32_FSInfoSector = (ushort)Marshal.ReadInt16(ptr); // 48, 2
                 ptr = IntPtr.Add(ptr, 2);
 
-                this.FAT32_BackupBootSector = (ushort)Marshal.ReadInt16(ptr); // 50, 2
+                FAT32_BackupBootSector = (ushort)Marshal.ReadInt16(ptr); // 50, 2
                 ptr = IntPtr.Add(ptr, 2);
 
-                this.FAT32_Reserved1 = new byte[12];  // 52, 12
+                FAT32_Reserved1 = new byte[12];  // 52, 12
 
                 for (i=0;i<12;i++) 
                 {
-                    this.FAT32_Reserved1[i] = Marshal.ReadByte(ptr);
+                    FAT32_Reserved1[i] = Marshal.ReadByte(ptr);
                     ptr = IntPtr.Add(ptr, 1);
                 }
 
-                this.FAT32_LogicalDriveNumber = (byte)Marshal.ReadByte(ptr); // 64, 1
+                FAT32_LogicalDriveNumber = Marshal.ReadByte(ptr); // 64, 1
                 ptr = IntPtr.Add(ptr, 1);
 
-                this.FAT32_Reserved2 = (byte)Marshal.ReadByte(ptr); // 65, 1
+                FAT32_Reserved2 = Marshal.ReadByte(ptr); // 65, 1
                 ptr = IntPtr.Add(ptr, 1);
 
-                this.FAT32_ExtendedSignature = (byte)Marshal.ReadByte(ptr); // 66, 1
+                FAT32_ExtendedSignature = Marshal.ReadByte(ptr); // 66, 1
                 ptr = IntPtr.Add(ptr, 1);
 
-                this.FAT32_PartitionSerialNumber = (uint)Marshal.ReadInt32(ptr); // 67, 1
+                FAT32_PartitionSerialNumber = (uint)Marshal.ReadInt32(ptr); // 67, 1
                 ptr = IntPtr.Add(ptr, 4);
 
                 StringBuilder volName32 = new StringBuilder(11); // 71, 11
@@ -451,7 +451,7 @@ namespace Little_Disk_Defrag.Misc
                     ptr = IntPtr.Add(ptr, 1);
                 }
 
-                this.FAT32_VolumeName = volName32.ToString();
+                FAT32_VolumeName = volName32.ToString();
 
                 StringBuilder fileSystemType32 = new StringBuilder(8);   // 82, 8
 
@@ -462,13 +462,13 @@ namespace Little_Disk_Defrag.Misc
                     ptr = IntPtr.Add(ptr, 1);
                 }
 
-                this.FAT32_FSType = fileSystemType32.ToString();
+                FAT32_FSType = fileSystemType32.ToString();
 
-                this.FAT32_Reserved3 = new byte[420]; // 90, 420
+                FAT32_Reserved3 = new byte[420]; // 90, 420
 
                 for (i = 0; i < 420; i++)
                 {
-                    this.FAT32_Reserved3[i] = Marshal.ReadByte(ptr);
+                    FAT32_Reserved3[i] = Marshal.ReadByte(ptr);
                     ptr = IntPtr.Add(ptr, 1);
                 }
             }
@@ -480,15 +480,15 @@ namespace Little_Disk_Defrag.Misc
             public ushort[] FAT16;
             public uint[] FAT32;
 
-            public FATData(IntPtr ptr, Helpers.Partitions.FAT.FATTypes type, ulong size)
+            public FATData(IntPtr ptr, FAT.FATTypes type, ulong size)
             {
                 ulong i;
 
-                this.FAT12 = new byte[1];
-                this.FAT16 = new ushort[1];
-                this.FAT32 = new uint[1];
+                FAT12 = new byte[1];
+                FAT16 = new ushort[1];
+                FAT32 = new uint[1];
 
-                if (type == Helpers.Partitions.FAT.FATTypes.FAT12)
+                if (type == FAT.FATTypes.FAT12)
                 {
                     List<byte> arr = new List<byte>();
 
@@ -499,9 +499,9 @@ namespace Little_Disk_Defrag.Misc
                         ptr = IntPtr.Add(ptr, 1);
                     }
 
-                    this.FAT12 = arr.ToArray();
+                    FAT12 = arr.ToArray();
                 }
-                else if (type == Helpers.Partitions.FAT.FATTypes.FAT16)
+                else if (type == FAT.FATTypes.FAT16)
                 {
                     List<ushort> arr = new List<ushort>();
 
@@ -512,9 +512,9 @@ namespace Little_Disk_Defrag.Misc
                         ptr = IntPtr.Add(ptr, 2);
                     }
 
-                    this.FAT16 = arr.ToArray();
+                    FAT16 = arr.ToArray();
                 }
-                else if (type == Helpers.Partitions.FAT.FATTypes.FAT32)
+                else if (type == FAT.FATTypes.FAT32)
                 {
                     List<uint> arr = new List<uint>();
 
@@ -525,7 +525,7 @@ namespace Little_Disk_Defrag.Misc
                         ptr = IntPtr.Add(ptr, 4);
                     }
 
-                    this.FAT32 = arr.ToArray();
+                    FAT32 = arr.ToArray();
                 }
             }
         }
@@ -586,20 +586,20 @@ namespace Little_Disk_Defrag.Misc
 
             public RETRIEVAL_POINTERS_BUFFER(IntPtr ptr)
             {
-                this.ExtentCount = (int)Marshal.PtrToStructure(ptr, typeof(int));
+                ExtentCount = (int)Marshal.PtrToStructure(ptr, typeof(int));
 
                 ptr = IntPtr.Add(ptr, 8); // Added additional 4 bytes because of padding
                 
                 // StartingVcn
-                this.StartingVcn = (LARGE_INTEGER)Marshal.PtrToStructure(ptr, typeof(LARGE_INTEGER));
+                StartingVcn = (LARGE_INTEGER)Marshal.PtrToStructure(ptr, typeof(LARGE_INTEGER));
 
                 ptr = IntPtr.Add(ptr, 8); 
 
-                this.Extents = new List<Extent>();
+                Extents = new List<Extent>();
 
-                for (int i = 0; i < this.ExtentCount; i++)
+                for (int i = 0; i < ExtentCount; i++)
                 {
-                    this.Extents.Add(new Extent(ptr));
+                    Extents.Add(new Extent(ptr));
 
                     ptr = IntPtr.Add(ptr, 16);
                 }
@@ -696,7 +696,7 @@ namespace Little_Disk_Defrag.Misc
             /// <summary>
             /// The volume supports transactions.
             /// </summary>
-            SupportsTransactions = 0x200000,
+            SupportsTransactions = 0x200000
         }
 
         public enum MEDIA_TYPE : uint

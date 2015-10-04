@@ -18,9 +18,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace Little_Disk_Defrag.Helpers
 {
@@ -41,7 +39,7 @@ namespace Little_Disk_Defrag.Helpers
 
         public string Name
         {
-            get { return this._name; }
+            get { return _name; }
         }
 
         /// <summary>
@@ -49,35 +47,35 @@ namespace Little_Disk_Defrag.Helpers
         /// </summary>
         public uint DirIndice
         {
-            get { return this._dirIndice; }
+            get { return _dirIndice; }
         }
 
         public UInt64 Size
         {
-            get { return this._size; }
+            get { return _size; }
         }
         public UInt64 Clusters
         {
-            get { return this._clusters; }
-            set { this._clusters = value; }
+            get { return _clusters; }
+            set { _clusters = value; }
         }
         public FileAttr Attributes
         {
-            get { return this._attributes; }
+            get { return _attributes; }
         }
         public List<Extent> Fragments
         {
-            get { return this._fragments; }
+            get { return _fragments; }
         }
 
-        public FileInfo(string name, uint indice, UInt64 size, System.IO.FileAttributes fileAttrs)
+        public FileInfo(string name, uint indice, UInt64 size, FileAttributes fileAttrs)
         {
-            this._name = name;
-            this._dirIndice = indice;
-            this._size = size;
+            _name = name;
+            _dirIndice = indice;
+            _size = size;
 
-            this._fragments = new List<Extent>();
-            this._attributes = new FileAttr(fileAttrs);
+            _fragments = new List<Extent>();
+            _attributes = new FileAttr(fileAttrs);
         }
     }
 }

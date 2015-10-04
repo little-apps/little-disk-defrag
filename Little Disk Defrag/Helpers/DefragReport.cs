@@ -18,9 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Little_Disk_Defrag.Helpers
 {
@@ -50,27 +47,27 @@ namespace Little_Disk_Defrag.Helpers
 
         public double AverageFragments
         {
-            get { return (double)FilesFragments / (double)FilesCount; }
+            get { return FilesFragments / (double)FilesCount; }
         }
 
         public List<uint> FraggedFiles
         {
-            get { return this._fraggedFiles; }
+            get { return _fraggedFiles; }
         }
         public List<uint> UnfraggedFiles
         {
-            get { return this._unfraggedFiles; }
+            get { return _unfraggedFiles; }
         }
         public List<uint> UnmovableFiles
         {
-            get { return this._unmovableFiles; }
+            get { return _unmovableFiles; }
         }
 
         public DefragReport()
         {
-            this._fraggedFiles = new List<uint>();
-            this._unfraggedFiles = new List<uint>();
-            this._unmovableFiles = new List<uint>();
+            _fraggedFiles = new List<uint>();
+            _unfraggedFiles = new List<uint>();
+            _unmovableFiles = new List<uint>();
         }
     }
 }

@@ -16,13 +16,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Little_Disk_Defrag.Misc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using Little_Disk_Defrag.Misc;
 
 namespace Little_Disk_Defrag.Helpers
 {
@@ -58,85 +54,85 @@ namespace Little_Disk_Defrag.Helpers
         /// </summary>
         public bool DoLimitLength
         {
-            get { return this._doLimitLength; }
-            set { this._doLimitLength = value; }
+            get { return _doLimitLength; }
+            set { _doLimitLength = value; }
         }
 
         public bool IsDoneYet
         {
-            get { return this.Done; }
+            get { return Done; }
         }
 
         public bool HasError
         {
-            get { return this.Error; }
+            get { return Error; }
         }
 
         public bool ShowReport
         {
-            get { return this._showReport; }
-            set { this._showReport = value; }
+            get { return _showReport; }
+            set { _showReport = value; }
         }
 
         public string StatusString
         {
             get 
             {
-                lock (this._lock)
+                lock (_lock)
                 {
-                    return this._statusString;
+                    return _statusString;
                 }
             }
             set
             {
-                lock (this._lock)
+                lock (_lock)
                 {
-                    this._statusString = value;
+                    _statusString = value;
                 }
             }
         }
 
         public double StatusPercent
         {
-            get { return this._statusPercent; }
+            get { return _statusPercent; }
             set
             {
                 if (value < 0 || value > 100)
                     return;
 
-                this._statusPercent = value;
+                _statusPercent = value;
             }
         }
 
         public string DriveName
         {
-            get { return this._driveName; }
+            get { return _driveName; }
         }
 
         public DefragReport Report
         { 
-            get { return this._defragReport; }
+            get { return _defragReport; }
         }
         public DriveVolume Volume
         {
-            get { return this._driveVolume; }
+            get { return _driveVolume; }
         }
 
         public bool VolumeOpen { get; set; }
 
         public bool UpdateDrawing
         {
-            get { return this._updateDrawing; }
-            set { this._updateDrawing = value; }
+            get { return _updateDrawing; }
+            set { _updateDrawing = value; }
         }
 
         public Defragment()
         {
-            this._defragReport = new DefragReport();
+            _defragReport = new DefragReport();
 
-            this.Reset();
+            Reset();
             
-            this._lastBMPUpdate = DateTime.Now;
+            _lastBMPUpdate = DateTime.Now;
         }
 
         public void Reset()
@@ -152,63 +148,63 @@ namespace Little_Disk_Defrag.Helpers
 
         public void Open(string volume, bool silent = false)
         {
-            this._driveVolume = new DriveVolume();
+            _driveVolume = new DriveVolume();
 
-            this._driveName = volume;
+            _driveName = volume;
 
             if (!silent)
-                this.StatusString = "Opening volume " + volume;
+                StatusString = "Opening volume " + volume;
 
             if (!Volume.Open(volume))
             {
                 if (!silent)
                 {
-                    this.StatusString = "Error opening volume " + volume;
-                    this.StatusPercent = 100.0f;
+                    StatusString = "Error opening volume " + volume;
+                    StatusPercent = 100.0f;
                 }
 
                 Error = true;
                 Done = true;
 
-                this.VolumeOpen = false;
+                VolumeOpen = false;
 
                 return;
             }
 
-            this.VolumeOpen = true;
+            VolumeOpen = true;
 
             if (!silent)
-                this.StatusString = "Getting volume bitmap";
+                StatusString = "Getting volume bitmap";
 
             if (!Volume.GetBitmap())
             {
                 if (!silent)
-                    this.StatusString = "Could not get volume " + DriveName + " bitmap";
+                    StatusString = "Could not get volume " + DriveName + " bitmap";
 
                 Error = true;
 
-                this.Close();
+                Close();
 
                 return;
             }
 
-            this.UpdateDrawing = true;
+            UpdateDrawing = true;
         }
 
         public void SetMethod(DefragMethod method)
         {
-            this._method = method;
+            _method = method;
         }
 
         public void CloseVolume()
         {
-            if (!this.VolumeOpen)
+            if (!VolumeOpen)
                 return;
 
-            if (this._driveVolume == null)
+            if (_driveVolume == null)
                 return;
 
-            this.Volume.Dispose();
+            Volume.Dispose();
         }
 
         public void Close()
@@ -217,27 +213,27 @@ namespace Little_Disk_Defrag.Helpers
             {
                 string OldStatus;
 
-                OldStatus = this.StatusString;
+                OldStatus = StatusString;
                 StatusPercent = 99.999999f;
 
-                this.StatusString = "Closing volume " + DriveName;
+                StatusString = "Closing volume " + DriveName;
 
-                this.CloseVolume();
+                CloseVolume();
 
                 StatusPercent = 100.0f;
 
                 // If there was an error then the wstring has already been set
                 if (Error)
-                    this.StatusString = OldStatus;
+                    StatusString = OldStatus;
                 else if (PleaseStop)
-                    this.StatusString = "Volume " + DriveName + " defragmentation was stopped";
+                    StatusString = "Volume " + DriveName + " defragmentation was stopped";
                 else
-                    this.StatusString = "Finished defragmenting " + DriveName;
+                    StatusString = "Finished defragmenting " + DriveName;
 
-                this._driveName = "";
+                _driveName = "";
 
                 if (!Error && !PleaseStop)
-                    this.ShowReport = true; // causes report window to open
+                    ShowReport = true; // causes report window to open
 
                 Done = true;
             }
@@ -255,80 +251,80 @@ namespace Little_Disk_Defrag.Helpers
             {
                 if (Error) 
                 {
-                    this.Close();
+                    Close();
                     return;
                 }
 
                 // First thing: build a file list.
-                this.StatusString = "Getting volume bitmap";
+                StatusString = "Getting volume bitmap";
                 if (!Volume.GetBitmap())
                 {
-                    this.StatusString = "Could not get volume " + DriveName + " bitmap";
+                    StatusString = "Could not get volume " + DriveName + " bitmap";
                     Error = true;
-                    this.Close();
+                    Close();
                     return;
                 }
 
-                this.UpdateDrawing = true;
+                UpdateDrawing = true;
 
-                this._lastBMPUpdate = DateTime.Now;
+                _lastBMPUpdate = DateTime.Now;
 
                 if (PleaseStop)
                 {
-                    this.Close();
+                    Close();
                     return;
                 }
 
-                this.StatusString = "Obtaining volume geometry";
-                if (!this.Volume.PartInfo.GetPartitionInfo())
+                StatusString = "Obtaining volume geometry";
+                if (!Volume.PartInfo.GetPartitionInfo())
                 {
-                    this.StatusString = "Could not obtain volume " + DriveName + " geometry";
+                    StatusString = "Could not obtain volume " + DriveName + " geometry";
                     Error = true;
 
-                    this.Close();
-
-                    return;
-                }
-
-                if (PleaseStop)
-                {
-                    this.Close();
-                    return;
-                }
-
-                this.StatusString = "Obtaining partition information";
-                if (!this.Volume.PartInfo.GetPartitionDetails())
-                {
-                    this.StatusString = "Could not obtain partition " + DriveName + " information";
-                    Error = true;
-
-                    this.Close();
+                    Close();
 
                     return;
                 }
 
                 if (PleaseStop)
                 {
-                    this.Close();
+                    Close();
                     return;
                 }
 
-                this.StatusString = "Building file database for volume " + DriveName;
+                StatusString = "Obtaining partition information";
+                if (!Volume.PartInfo.GetPartitionDetails())
+                {
+                    StatusString = "Could not obtain partition " + DriveName + " information";
+                    Error = true;
+
+                    Close();
+
+                    return;
+                }
+
+                if (PleaseStop)
+                {
+                    Close();
+                    return;
+                }
+
+                StatusString = "Building file database for volume " + DriveName;
                 if (!Volume.BuildFileList(this))
                 {
-                    this.StatusString = "Could not build file database for volume " + DriveName;
+                    StatusString = "Could not build file database for volume " + DriveName;
                     Error = true;
-                    this.Close();
+                    Close();
                     return;
                 }
 
                 if (PleaseStop)
                 {
-                    this.Close();
+                    Close();
                     return;
                 }
 
-                this.StatusString = "Analyzing database for " + DriveName;
+                StatusString = "Analyzing database for " + DriveName;
                 TotalClusters = 0;
                 for (i = 0; i < Volume.DBFileCount; i++)
                 {
@@ -343,12 +339,12 @@ namespace Little_Disk_Defrag.Helpers
 
                 if (PleaseStop)
                 {
-                    this.Close();
+                    Close();
                     return;
                 }
 
                 // Analyze?
-                if (this._method == DefragMethod.ANALYZE)
+                if (_method == DefragMethod.ANALYZE)
                 {
                     uint j;
 
@@ -384,7 +380,7 @@ namespace Little_Disk_Defrag.Helpers
                         if (!Info.Attributes.Process)
                             continue;
 
-                        this.StatusString = Volume.GetDBDir(Info.DirIndice) + Info.Name;
+                        StatusString = Volume.GetDBDir(Info.DirIndice) + Info.Name;
 
                         Report.FilesSizeClusters += Info.Clusters;
                         Report.FilesSizeBytes += Info.Size;
@@ -397,12 +393,12 @@ namespace Little_Disk_Defrag.Helpers
                         else
                             Report.UnfraggedFiles.Add(j);
 
-                        StatusPercent = ((double)j / (double)Report.FilesCount) * 100.0f;
+                        StatusPercent = (j / (double)Report.FilesCount) * 100.0f;
                     }
 
-                    Report.FilesSizeOnDisk = Report.FilesSizeClusters * (UInt64)Volume.PartInfo.ClusterSize;
+                    Report.FilesSizeOnDisk = Report.FilesSizeClusters * Volume.PartInfo.ClusterSize;
                     Report.FilesSlackBytes = Report.FilesSizeOnDisk - Report.FilesSizeBytes;
-                    Report.PercentFragged = 100.0f * ((double)Report.FraggedFiles.Count / (double)Report.FilesCount);
+                    Report.PercentFragged = 100.0f * (Report.FraggedFiles.Count / (double)Report.FilesCount);
 
                     UInt64 Percent;
                     Percent = (10000 * Report.FilesSlackBytes) / Report.FilesSizeOnDisk;
@@ -421,7 +417,7 @@ namespace Little_Disk_Defrag.Helpers
                         // What? They want us to pause? Oh ok.
                         if (PleasePause)
                         {
-                            this.StatusString = "Paused";
+                            StatusString = "Paused";
                             PleasePause = false;
 
                             while (PleasePause == false)
@@ -434,7 +430,7 @@ namespace Little_Disk_Defrag.Helpers
 
                         if (PleaseStop)
                         {
-                            this.StatusString = "Stopping";
+                            StatusString = "Stopping";
                             break;
                         }
 
@@ -448,15 +444,15 @@ namespace Little_Disk_Defrag.Helpers
                             continue;
 
                         if (!DoLimitLength)
-                            this.StatusString = Volume.GetDBDir(Info.DirIndice) + Info.Name;
+                            StatusString = Volume.GetDBDir(Info.DirIndice) + Info.Name;
                         else
                         {
                             PrintName = Utils.FitName(Volume.GetDBDir(Info.DirIndice), Info.Name, Width);
-                            this.StatusString = PrintName;
+                            StatusString = PrintName;
                         }
 
                         // Calculate percentage complete
-                        StatusPercent = 100.0f * (double)((double)PreviousClusters / (double)TotalClusters);
+                        StatusPercent = 100.0f * (PreviousClusters / (double)TotalClusters);
 
                         // Can't defrag directories yet
                         if (Info.Attributes.Directory)
@@ -471,7 +467,7 @@ namespace Little_Disk_Defrag.Helpers
                         //       are consolidated. I.e. we assume it is NOT the case that
                         //       two extents account for a sequential range of (non-
                         //       fragmented) clusters.
-                        if (Info.Fragments.Count == 1 && this._method == DefragMethod.FASTDEFRAG)
+                        if (Info.Fragments.Count == 1 && _method == DefragMethod.FASTDEFRAG)
                             continue;
 
                         // Otherwise, defrag0rize it!
@@ -487,7 +483,7 @@ namespace Little_Disk_Defrag.Helpers
                                 // If we're doing an extensive defrag and the file is already defragmented
                                 // and if its new location would be after its current location, don't
                                 // move it.
-                                if (this._method == DefragMethod.NORMDEFRAG && Info.Fragments.Count == 1 && TargetLCN > (ulong)Info.Fragments[0].StartLCN)
+                                if (_method == DefragMethod.NORMDEFRAG && Info.Fragments.Count == 1 && TargetLCN > Info.Fragments[0].StartLCN)
                                 {
                                     Retry = 1;
                                 }
@@ -502,7 +498,7 @@ namespace Little_Disk_Defrag.Helpers
                             }
 
                             // Only update bitmap if it's older than 15 seconds
-                            if (DateTime.Now.Subtract(this._lastBMPUpdate).TotalSeconds < 15000)
+                            if (DateTime.Now.Subtract(_lastBMPUpdate).TotalSeconds < 15000)
                                 Retry = 1;
                             else
                             if (!Result  ||  Retry != 1)
@@ -511,23 +507,23 @@ namespace Little_Disk_Defrag.Helpers
 
                                 if (!DoLimitLength)
                                 {
-                                    this.StatusString += " .";
+                                    StatusString += " .";
                                 }
 
                                 if (Volume.GetBitmap ())
                                 {
-                                    this._lastBMPUpdate = DateTime.Now;
+                                    _lastBMPUpdate = DateTime.Now;
 
                                     if (!DoLimitLength)
-                                        this.StatusString = Volume.GetDBDir (Info.DirIndice) + Info.Name;
+                                        StatusString = Volume.GetDBDir (Info.DirIndice) + Info.Name;
                                     else
-                                        this.StatusString = PrintName;
+                                        StatusString = PrintName;
 
                                     Volume.FindFreeRange (0, 1, out FirstFreeLCN);
                                 }
                                 else
                                 {
-                                    this.StatusString = "Could not re-obtain volume " + DriveName + " bitmap";
+                                    StatusString = "Could not re-obtain volume " + DriveName + " bitmap";
                                     Error = true;
                                 }
                             }
@@ -535,34 +531,34 @@ namespace Little_Disk_Defrag.Helpers
                             Retry--;
                         }
 
-                        if (Error == true)
+                        if (Error)
                             break;
                     }
                 }
             }
-            catch (System.Threading.ThreadAbortException)
+            catch (ThreadAbortException)
             {
 
             }
             finally
             {
-                this.Close();
+                Close();
             }
         }
         public void TogglePause()
         {
-            lock (this._lock)
+            lock (_lock)
             {
-                this.StatusString = "Pausing ...";
-                this.PleasePause = true;
+                StatusString = "Pausing ...";
+                PleasePause = true;
             }
         }
         public void Stop()
         {
-            lock (this._lock)
+            lock (_lock)
             {
-                this.StatusString = "Stopping ...";
-                this.PleaseStop = true;
+                StatusString = "Stopping ...";
+                PleaseStop = true;
             }
         }
 

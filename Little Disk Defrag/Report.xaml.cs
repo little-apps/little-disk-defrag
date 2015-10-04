@@ -16,21 +16,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Little_Disk_Defrag.Helpers;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using Little_Disk_Defrag.Helpers;
 
 namespace Little_Disk_Defrag
 {
@@ -45,8 +33,8 @@ namespace Little_Disk_Defrag
 
         private void OnPropertyChanged(string prop)
         {
-            if (this.PropertyChanged != null)
-                this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(prop));
         }
 
         #endregion
@@ -75,203 +63,203 @@ namespace Little_Disk_Defrag
 
         public string DriveLetter
         {
-            get { return this._driveLetter; }
+            get { return _driveLetter; }
             set
             {
-                this._driveLetter = value;
-                this.OnPropertyChanged("DriveLetter");
+                _driveLetter = value;
+                OnPropertyChanged("DriveLetter");
             }
         }
 
         public string DirCount
         {
-            get { return this._dirCount; }
+            get { return _dirCount; }
             set
             {
-                this._dirCount = value;
-                this.OnPropertyChanged("DirCount");
+                _dirCount = value;
+                OnPropertyChanged("DirCount");
             }
         }
 
         public string VolumeLabel
         {
-            get { return this._volLabel; }
+            get { return _volLabel; }
             set
             {
-                this._volLabel = value;
-                this.OnPropertyChanged("VolumeLabel");
+                _volLabel = value;
+                OnPropertyChanged("VolumeLabel");
             }
         }
 
         public string FilesCount
         {
-            get { return this._filesCount; }
+            get { return _filesCount; }
             set
             {
-                this._filesCount = value;
-                this.OnPropertyChanged("FilesCount");
+                _filesCount = value;
+                OnPropertyChanged("FilesCount");
             }
         }
         public string Serial
         {
-            get { return this._serial; }
+            get { return _serial; }
             set
             {
-                this._serial = value;
-                this.OnPropertyChanged("Serial");
+                _serial = value;
+                OnPropertyChanged("Serial");
             }
         }
         public string TotalSize
         {
-            get { return this._totalSize; }
+            get { return _totalSize; }
             set
             {
-                this._totalSize = value;
-                this.OnPropertyChanged("TotalSize");
+                _totalSize = value;
+                OnPropertyChanged("TotalSize");
             }
         }
         public string FileSystem
         {
-            get { return this._fileSystem; }
+            get { return _fileSystem; }
             set
             {
-                this._fileSystem = value;
-                this.OnPropertyChanged("FileSystem");
+                _fileSystem = value;
+                OnPropertyChanged("FileSystem");
             }
         }
 
         public string DiskSize
         {
-            get { return this._diskSize; }
+            get { return _diskSize; }
             set
             {
-                this._diskSize = value;
-                this.OnPropertyChanged("DiskSize");
+                _diskSize = value;
+                OnPropertyChanged("DiskSize");
             }
         }
         public string Capacity
         {
-            get { return this._capacity; }
+            get { return _capacity; }
             set
             {
-                this._capacity = value;
-                this.OnPropertyChanged("Capacity");
+                _capacity = value;
+                OnPropertyChanged("Capacity");
             }
         }
         public string WastedSlack
         {
-            get { return this._wastedSlack; }
+            get { return _wastedSlack; }
             set
             {
-                this._wastedSlack = value;
-                this.OnPropertyChanged("WastedSlack");
+                _wastedSlack = value;
+                OnPropertyChanged("WastedSlack");
             }
         }
         public string FreeSpace
         {
-            get { return this._freeSpace; }
+            get { return _freeSpace; }
             set
             {
-                this._freeSpace = value;
-                this.OnPropertyChanged("FreeSpace");
+                _freeSpace = value;
+                OnPropertyChanged("FreeSpace");
             }
         }
         public string Fragmented
         {
-            get { return this._fragmented; }
+            get { return _fragmented; }
             set
             {
-                this._fragmented = value;
-                this.OnPropertyChanged("Fragmented");
+                _fragmented = value;
+                OnPropertyChanged("Fragmented");
             }
         }
 
         public string TotalClusters
         {
-            get { return this._totalClusters; }
+            get { return _totalClusters; }
             set
             {
-                this._totalClusters = value;
-                this.OnPropertyChanged("TotalClusters");
+                _totalClusters = value;
+                OnPropertyChanged("TotalClusters");
             }
         }
 
         public string AvgFragments
         {
-            get { return this._avgFragments; }
+            get { return _avgFragments; }
             set
             {
-                this._avgFragments = value;
-                this.OnPropertyChanged("AvgFragments");
+                _avgFragments = value;
+                OnPropertyChanged("AvgFragments");
             }
         }
         public string ClusterSize
         {
-            get { return this._clusterSize; }
+            get { return _clusterSize; }
             set
             {
-                this._clusterSize = value;
-                this.OnPropertyChanged("ClusterSize");
+                _clusterSize = value;
+                OnPropertyChanged("ClusterSize");
             }
         }
 
         public string Recommendations
         {
-            get { return this._recommendations; }
+            get { return _recommendations; }
             set
             {
-                this._recommendations = value;
-                this.OnPropertyChanged("Recommendations");
+                _recommendations = value;
+                OnPropertyChanged("Recommendations");
             }
         }
 
         public int SelectedIndexUnit
         {
-            get { return this._selectedIndexUnit; }
+            get { return _selectedIndexUnit; }
             set
             {
-                this._selectedIndexUnit = value;
+                _selectedIndexUnit = value;
 
-                if (this._defragger != null)
-                    this.UpdateData();
+                if (_defragger != null)
+                    UpdateData();
 
-                this.OnPropertyChanged("SelectedIndexUnit");
+                OnPropertyChanged("SelectedIndexUnit");
             }
         }
 
         public string SelectedUnit
         {
-            get { return this.Units[this.SelectedIndexUnit]; }
+            get { return Units[SelectedIndexUnit]; }
         }
 
         public string[] Units
         {
-            get { return this._units; }
+            get { return _units; }
         }
 
         public Defragment Defragger
         {
-            get { return this._defragger; }
+            get { return _defragger; }
         }
 
         public DefragReport DefragReport
         {
-            get { return this._defragReport; }
+            get { return _defragReport; }
         }
 
         public Report(Defragment defragger)
         {
             InitializeComponent();
 
-            this._units = new string[] { "Bytes", "Kilobytes", "Megabytes", "Gigabytes" };
-            this.OnPropertyChanged("Units");
+            _units = new[] { "Bytes", "Kilobytes", "Megabytes", "Gigabytes" };
+            OnPropertyChanged("Units");
 
-            this.SelectedIndexUnit = 0;
+            SelectedIndexUnit = 0;
 
-            this._defragger = defragger;
-            this._defragReport = defragger.Report;
+            _defragger = defragger;
+            _defragReport = defragger.Report;
 
-            this.UpdateData();
+            UpdateData();
         }
 
         private void UpdateData()
@@ -279,7 +267,7 @@ namespace Little_Disk_Defrag
             bool Fractional = false;
             uint BytesDivisor;
 
-            switch (this.SelectedUnit)
+            switch (SelectedUnit)
             {
                 case "Bytes":
                     BytesDivisor = 1;
@@ -303,104 +291,104 @@ namespace Little_Disk_Defrag
             string Text;
 
             // Volume name
-            this.DriveLetter = this.DefragReport.RootPath;
+            DriveLetter = DefragReport.RootPath;
 
             // Volume label
-            this.VolumeLabel = this.DefragReport.Label;
+            VolumeLabel = DefragReport.Label;
 
             // Volume Serial
-            this.Serial = this.DefragReport.Serial;
+            Serial = DefragReport.Serial;
 
             // File System
-            this.FileSystem = this.DefragReport.FileSystem;
+            FileSystem = DefragReport.FileSystem;
 
             // DiskSizeBytes
             if (Fractional)
-                this.DiskSize = string.Format("{0:F2} {1}", (double)(this.DefragReport.DiskSizeBytes / (BytesDivisor / 1024D)) / 1024.0D, this.SelectedUnit);
+                DiskSize = string.Format("{0:F2} {1}", DefragReport.DiskSizeBytes / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit);
             else
-                this.DiskSize = string.Format("{0:N0}", this.DefragReport.DiskSizeBytes / BytesDivisor) + " " + this.SelectedUnit;
+                DiskSize = string.Format("{0:N0}", DefragReport.DiskSizeBytes / BytesDivisor) + " " + SelectedUnit;
 
             // DiskFreeBytes
             if (Fractional)
-                this.FreeSpace = string.Format("{0:F2} {1}", (double)(this.DefragReport.FreeBytes / (BytesDivisor / 1024D)) / 1024.0D, this.SelectedUnit);
+                FreeSpace = string.Format("{0:F2} {1}", DefragReport.FreeBytes / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit);
             else
-                this.FreeSpace = string.Format("{0:N0}", this.DefragReport.FreeBytes / BytesDivisor) + " " + this.SelectedUnit;
+                FreeSpace = string.Format("{0:N0}", DefragReport.FreeBytes / BytesDivisor) + " " + SelectedUnit;
 
             // DiskSizeClusters
-            this.TotalClusters = string.Format("{0:N0} clusters", this.DefragReport.ClusterCount);
+            TotalClusters = string.Format("{0:N0} clusters", DefragReport.ClusterCount);
 
             // DiskClusterSize
-            this.ClusterSize = string.Format("{0} bytes", this.DefragReport.ClusterSize);
+            ClusterSize = string.Format("{0} bytes", DefragReport.ClusterSize);
 
             // DirsCount
-            this.DirCount = string.Format("{0:N0}", this.DefragReport.DirsCount);
+            DirCount = string.Format("{0:N0}", DefragReport.DirsCount);
 
             // FilesCount
-            this.FilesCount = string.Format("{0:N0}", this.DefragReport.FilesCount);
+            FilesCount = string.Format("{0:N0}", DefragReport.FilesCount);
 
             // FilesFragged
-            this.Fragmented = string.Format("{0:F2}% {1:N0}", this.DefragReport.PercentFragged, this.DefragReport.FraggedFiles.Count);
+            Fragmented = string.Format("{0:F2}% {1:N0}", DefragReport.PercentFragged, DefragReport.FraggedFiles.Count);
 
             // Average Frags
-            this.AvgFragments = string.Format("{0:F2}", this.DefragReport.AverageFragments);
+            AvgFragments = string.Format("{0:F2}", DefragReport.AverageFragments);
 
             // FilesSizeBytes
             if (Fractional)
-                this.TotalSize = string.Format("{0:F2} {1}", (double)(this.DefragReport.FilesSizeBytes / (BytesDivisor / 1024D)) / 1024.0D, this.SelectedUnit);
+                TotalSize = string.Format("{0:F2} {1}", DefragReport.FilesSizeBytes / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit);
             else
-                this.TotalSize = string.Format("{0:N0} {1}", this.DefragReport.FilesSizeBytes / (UInt64)BytesDivisor, this.SelectedUnit);
+                TotalSize = string.Format("{0:N0} {1}", DefragReport.FilesSizeBytes / BytesDivisor, SelectedUnit);
 
             // Files SizeOnDisk
             if (Fractional)
-                this.DiskSize = string.Format("{0:F2} {1}", (double)((this.DefragReport.FilesSizeBytes + this.DefragReport.FilesSlackBytes) / (BytesDivisor / 1024D)) / 1024.0D, this.SelectedUnit);
+                DiskSize = string.Format("{0:F2} {1}", (DefragReport.FilesSizeBytes + DefragReport.FilesSlackBytes) / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit);
             else
-                this.DiskSize = string.Format("{0:N0} {1}", (this.DefragReport.FilesSizeBytes + this.DefragReport.FilesSlackBytes) / (UInt64)BytesDivisor, this.SelectedUnit);
+                DiskSize = string.Format("{0:N0} {1}", (DefragReport.FilesSizeBytes + DefragReport.FilesSlackBytes) / BytesDivisor, SelectedUnit);
 
             // FilesSlackBytes
             if (Fractional)
-                this.WastedSlack = string.Format("({2:F2}%) {0:F2} {1}", (double)(this.DefragReport.FilesSlackBytes / (BytesDivisor / 1024D)) / 1024.0D, this.SelectedUnit, this.DefragReport.PercentSlack);
+                WastedSlack = string.Format("({2:F2}%) {0:F2} {1}", DefragReport.FilesSlackBytes / (BytesDivisor / 1024D) / 1024.0D, SelectedUnit, DefragReport.PercentSlack);
             else
-                this.WastedSlack = string.Format("({2:F2}%) {0:N0} {1}", this.DefragReport.FilesSlackBytes / (UInt64)BytesDivisor, this.SelectedUnit, this.DefragReport.PercentSlack);
+                WastedSlack = string.Format("({2:F2}%) {0:N0} {1}", DefragReport.FilesSlackBytes / BytesDivisor, SelectedUnit, DefragReport.PercentSlack);
 
             // Recommendation
             bool PFRec = false; // Recommend based off percent fragged files?
             bool AFRec = false; // Recommend based off average fragments per file?
 
-            if (this.DefragReport.PercentFragged >= 5.0D)
+            if (DefragReport.PercentFragged >= 5.0D)
                 PFRec = true;
 
-            if (this.DefragReport.AverageFragments >= 1.1D)
+            if (DefragReport.AverageFragments >= 1.1D)
                 AFRec = true;
 
             Text = "* ";
 
             if (PFRec)
-                Text += string.Format("{0:F2}% of the files on this volume are fragmented. ", this.DefragReport.PercentFragged);
+                Text += string.Format("{0:F2}% of the files on this volume are fragmented. ", DefragReport.PercentFragged);
 
             if (AFRec)
-                Text += string.Format("The average fragments per file ({0:F2}) indicates a high degree of fragmentation. ", this.DefragReport.AverageFragments);
+                Text += string.Format("The average fragments per file ({0:F2}) indicates a high degree of fragmentation. ", DefragReport.AverageFragments);
 
-            if (this.DefragReport.PercentFragged < 5.0D && this.DefragReport.AverageFragments < 1.1D)
+            if (DefragReport.PercentFragged < 5.0D && DefragReport.AverageFragments < 1.1D)
                 Text = "* No defragmentation is necessary at this point.";
-            else if (this.DefragReport.PercentFragged < 15.0D && this.DefragReport.AverageFragments < 1.3D)
+            else if (DefragReport.PercentFragged < 15.0D && DefragReport.AverageFragments < 1.3D)
                 Text += "It is recommended that you perform a Fast Defrag.";
             else
                 Text += "It is recommended that you perform an Extensive Defrag.";
 
             // Should we recommend a smaller cluster size?
-            if (this.DefragReport.PercentSlack >= 10.0f)
+            if (DefragReport.PercentSlack >= 10.0f)
             {
                 Text += string.Format(
                     "\n* A large amount of disk space ({0:F2}%) is being lost " + 
                     "due to a large (%{0} bytes) cluster size. It is recommended " + 
                     "that you use a disk utility such as Partition Magic to " + 
                     "reduce the cluster size of this volume.",
-                    this.DefragReport.PercentSlack,
-                    this.DefragReport.ClusterSize
+                    DefragReport.PercentSlack,
+                    DefragReport.ClusterSize
                     );
             }
 
-            this.Recommendations = Text;
+            Recommendations = Text;
         }
     }
 }

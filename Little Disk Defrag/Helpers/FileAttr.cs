@@ -16,11 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace Little_Disk_Defrag.Helpers
@@ -47,18 +42,18 @@ namespace Little_Disk_Defrag.Helpers
 
         public FileAttr(FileAttributes fileAttrs)
         {
-            this.Archive = ((fileAttrs & FileAttributes.Archive) != 0);
-            this.Compressed = ((fileAttrs & FileAttributes.Compressed) != 0);
-            this.Directory = ((fileAttrs & FileAttributes.Directory) != 0);
-            this.Encrypted = ((fileAttrs & FileAttributes.Encrypted) != 0);
-            this.Hidden = ((fileAttrs & FileAttributes.Hidden) != 0);
-            this.Normal = ((fileAttrs & FileAttributes.Normal) != 0);
-            this.Offline = ((fileAttrs & FileAttributes.Offline) != 0);
-            this.ReadOnly = ((fileAttrs & FileAttributes.ReadOnly) != 0);
-            this.Reparse = ((fileAttrs & FileAttributes.ReparsePoint) != 0);
-            this.Sparse = ((fileAttrs & FileAttributes.SparseFile) != 0);
-            this.System = ((fileAttrs & FileAttributes.System) != 0);
-            this.Temporary = ((fileAttrs & FileAttributes.Temporary) != 0);
+            Archive = ((fileAttrs & FileAttributes.Archive) != 0);
+            Compressed = ((fileAttrs & FileAttributes.Compressed) != 0);
+            Directory = ((fileAttrs & FileAttributes.Directory) != 0);
+            Encrypted = ((fileAttrs & FileAttributes.Encrypted) != 0);
+            Hidden = ((fileAttrs & FileAttributes.Hidden) != 0);
+            Normal = ((fileAttrs & FileAttributes.Normal) != 0);
+            Offline = ((fileAttrs & FileAttributes.Offline) != 0);
+            ReadOnly = ((fileAttrs & FileAttributes.ReadOnly) != 0);
+            Reparse = ((fileAttrs & FileAttributes.ReparsePoint) != 0);
+            Sparse = ((fileAttrs & FileAttributes.SparseFile) != 0);
+            System = ((fileAttrs & FileAttributes.System) != 0);
+            Temporary = ((fileAttrs & FileAttributes.Temporary) != 0);
         }
     }
 }

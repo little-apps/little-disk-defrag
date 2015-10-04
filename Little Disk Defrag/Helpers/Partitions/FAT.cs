@@ -1,11 +1,8 @@
-﻿using Little_Disk_Defrag.Misc;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
+using System.Threading;
+using Little_Disk_Defrag.Misc;
 
 namespace Little_Disk_Defrag.Helpers.Partitions
 {
@@ -20,26 +17,26 @@ namespace Little_Disk_Defrag.Helpers.Partitions
 
         public FATTypes Type
         {
-            get { return this._fatType; }
-            set { this._fatType = value; }
+            get { return _fatType; }
+            set { _fatType = value; }
         }
 
         public ulong FirstDataSector
         {
-            get { return this._firstDataSector; }
-            set { this._firstDataSector = value; }
+            get { return _firstDataSector; }
+            set { _firstDataSector = value; }
         }
 
         public ulong DataSector
         {
-            get { return this._dataSector; }
-            set { this._dataSector = value; }
+            get { return _dataSector; }
+            set { _dataSector = value; }
         }
 
         public ulong RootDirSectors
         {
-            get { return this._rootDirSectors; }
-            set { this._rootDirSectors = value; }
+            get { return _rootDirSectors; }
+            set { _rootDirSectors = value; }
         }
 
         public FAT(DriveVolume volume) 
@@ -57,13 +54,13 @@ namespace Little_Disk_Defrag.Helpers.Partitions
             IntPtr BootSectorPtr = Marshal.AllocHGlobal(512);
             PInvoke.FATBootSector BootSector;
 
-            System.Threading.NativeOverlapped Overlapped = new System.Threading.NativeOverlapped();
+            NativeOverlapped Overlapped = new NativeOverlapped();
 
-            result = PInvoke.ReadFile(this.Volume.Handle, BootSectorPtr, (uint)512, out BytesRead, ref Overlapped);
+            result = PInvoke.ReadFile(Volume.Handle, BootSectorPtr, 512, out BytesRead, ref Overlapped);
 
             if (!result)
             {
-                Debug.WriteLine("Error #{0} occurred trying to read volume {1}", Marshal.GetLastWin32Error(), this.Volume.RootPath);
+                Debug.WriteLine("Error #{0} occurred trying to read volume {1}", Marshal.GetLastWin32Error(), Volume.RootPath);
                 return false;
             }
 
@@ -76,62 +73,62 @@ namespace Little_Disk_Defrag.Helpers.Partitions
             }
 
             // Fetch values from the bootblock and determine what FAT this is, FAT12, FAT16, or FAT32.
-            this.BytesPerSector = BootSector.BytesPerSector;
-            if (this.BytesPerSector == 0) {
+            BytesPerSector = BootSector.BytesPerSector;
+            if (BytesPerSector == 0) {
 	            Debug.WriteLine("This is not a FAT disk (BytesPerSector is zero).");
 	            return false;
             }
 
-            this.SectorsPerCluster = BootSector.SectorsPerCluster;
-            if (this.SectorsPerCluster == 0) {
+            SectorsPerCluster = BootSector.SectorsPerCluster;
+            if (SectorsPerCluster == 0) {
                 Debug.WriteLine("This is not a FAT disk (SectorsPerCluster is zero).");
 	            return false;
             }
 
-            this.TotalSectors = BootSector.TotalSectors16;
-            if (this.TotalSectors == 0)
-	            this.TotalSectors = BootSector.TotalSectors32;
+            TotalSectors = BootSector.TotalSectors16;
+            if (TotalSectors == 0)
+	            TotalSectors = BootSector.TotalSectors32;
 
-            this.RootDirSectors = (ulong)((BootSector.RootEntries * 32) + (BootSector.BytesPerSector - 1)) / BootSector.BytesPerSector;
+            RootDirSectors = (ulong)((BootSector.RootEntries * 32) + (BootSector.BytesPerSector - 1)) / BootSector.BytesPerSector;
 
             uint SectorsPerFAT = BootSector.SectorsPerFAT;
 
             if (SectorsPerFAT == 0)
                 SectorsPerFAT = BootSector.FAT1632Info.FAT32_SectorsPerFAT32;
 
-            this.FirstDataSector = BootSector.ReservedSectors + (BootSector.NumberOfFATs * SectorsPerFAT) + this.RootDirSectors;
-            this.DataSector = this.TotalSectors - (BootSector.ReservedSectors + (BootSector.NumberOfFATs * SectorsPerFAT) + this.RootDirSectors);
-            this.ClusterCount = this.DataSector / BootSector.SectorsPerCluster;
+            FirstDataSector = BootSector.ReservedSectors + (BootSector.NumberOfFATs * SectorsPerFAT) + RootDirSectors;
+            DataSector = TotalSectors - (BootSector.ReservedSectors + (BootSector.NumberOfFATs * SectorsPerFAT) + RootDirSectors);
+            ClusterCount = DataSector / BootSector.SectorsPerCluster;
 
-            if (this.ClusterCount < 4085) {
-		        this.Type = FATTypes.FAT12;
+            if (ClusterCount < 4085) {
+		        Type = FATTypes.FAT12;
 
                 Debug.WriteLine("This is a FAT12 disk.");
 	        }
-	        else if (this.ClusterCount < 65525) {
-		        this.Type = FATTypes.FAT16;
+	        else if (ClusterCount < 65525) {
+		        Type = FATTypes.FAT16;
 
 		        Debug.WriteLine("This is a FAT16 disk.");
 	        }
 	        else {
-		        this.Type = FATTypes.FAT32;
+		        Type = FATTypes.FAT32;
 
 		        Debug.WriteLine("This is a FAT32 disk.");
 	        }
 
-            this.BytesPerCluster = this.BytesPerSector * this.SectorsPerCluster;
+            BytesPerCluster = BytesPerSector * SectorsPerCluster;
 
-            this.TotalClusters = (uint)this.ClusterCount;
+            TotalClusters = (uint)ClusterCount;
 
             Debug.WriteLine("  OEMName: {0}", BootSector.BS_OEMName);
-	        Debug.WriteLine("  BytesPerSector: {0:d}", this.BytesPerSector);
-            Debug.WriteLine("  TotalSectors: {0:d}", this.TotalSectors);
-            Debug.WriteLine("  SectorsPerCluster: {0:d}", this.SectorsPerCluster);
-            Debug.WriteLine("  RootDirSectors: {0:d}", this.RootDirSectors);
+	        Debug.WriteLine("  BytesPerSector: {0:d}", BytesPerSector);
+            Debug.WriteLine("  TotalSectors: {0:d}", TotalSectors);
+            Debug.WriteLine("  SectorsPerCluster: {0:d}", SectorsPerCluster);
+            Debug.WriteLine("  RootDirSectors: {0:d}", RootDirSectors);
             Debug.WriteLine("  FATSz: {0:d}", SectorsPerFAT);
-            Debug.WriteLine("  FirstDataSector: {0:d}", this.FirstDataSector);
-            Debug.WriteLine("  DataSec: {0:d}", this.DataSector);
-            Debug.WriteLine("  CountofClusters: {0:d}", this.ClusterCount);
+            Debug.WriteLine("  FirstDataSector: {0:d}", FirstDataSector);
+            Debug.WriteLine("  DataSec: {0:d}", DataSector);
+            Debug.WriteLine("  CountofClusters: {0:d}", ClusterCount);
             Debug.WriteLine("  ReservedSectors: {0:d}", BootSector.ReservedSectors);
             Debug.WriteLine("  NumberFATs: {0:d}", BootSector.NumberOfFATs);
             Debug.WriteLine("  RootEntriesCount: {0:d}", BootSector.RootEntries);
@@ -139,7 +136,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
             Debug.WriteLine("  SectorsPerTrack: {0:d}", BootSector.SectorsPerTrack);
             Debug.WriteLine("  NumberOfHeads: {0:d}", BootSector.Heads);
             Debug.WriteLine("  HiddenSectors: {0:d}", BootSector.HiddenSectors);
-	        if (this.Type != FATTypes.FAT32) {
+	        if (Type != FATTypes.FAT32) {
                 Debug.WriteLine("  BS_DrvNum: {0:d}", BootSector.FAT1632Info.FAT16_LogicalDriveNumber);
                 Debug.WriteLine("  BS_BootSig: {0:d}", BootSector.FAT1632Info.FAT16_ExtendedSignature);
                 Debug.WriteLine("  BS_VolID: {0:d}", BootSector.FAT1632Info.FAT16_PartitionSerialNumber);
@@ -160,23 +157,23 @@ namespace Little_Disk_Defrag.Helpers.Partitions
                 Debug.WriteLine("  FilSysType: {0}", BootSector.FAT1632Info.FAT32_FSType);
 	        }
 
-            switch (this.Type)
+            switch (Type)
             {
                 case FATTypes.FAT12:
                     {
-                        FATSize = this.ClusterCount + 1; 
+                        FATSize = ClusterCount + 1; 
                         break;
                     }
 
                 case FATTypes.FAT16:
                     {
-                        FATSize = (this.ClusterCount + 1) * 2; 
+                        FATSize = (ClusterCount + 1) * 2; 
                         break;
                     }
 
                 case FATTypes.FAT32:
                     {
-                        FATSize = (this.ClusterCount + 1) * 4; 
+                        FATSize = (ClusterCount + 1) * 4; 
                         break;
                     }
                 default:
@@ -186,21 +183,21 @@ namespace Little_Disk_Defrag.Helpers.Partitions
                     }
             }
 
-            if (FATSize % this.BytesPerSector > 0)
-                FATSize = (ulong)(FATSize + this.BytesPerSector - FATSize % this.BytesPerSector);
+            if (FATSize % BytesPerSector > 0)
+                FATSize = FATSize + BytesPerSector - FATSize % BytesPerSector;
 
-            PInvoke.LARGE_INTEGER Trans = new PInvoke.LARGE_INTEGER() { QuadPart = BootSector.ReservedSectors * this.BytesPerSector };
+            PInvoke.LARGE_INTEGER Trans = new PInvoke.LARGE_INTEGER { QuadPart = BootSector.ReservedSectors * BytesPerSector };
 
             IntPtr FATDataPtr = Marshal.AllocHGlobal((int)FATSize);
 
-            System.Threading.NativeOverlapped nativeOverlapped = new System.Threading.NativeOverlapped();
+            NativeOverlapped nativeOverlapped = new NativeOverlapped();
             nativeOverlapped.EventHandle = IntPtr.Zero;
             nativeOverlapped.OffsetLow = (int)Trans.LowPart;
             nativeOverlapped.OffsetHigh = Trans.HighPart;
 
-            PInvoke.ReadFile(this.Volume.Handle, FATDataPtr, (uint)FATSize, out BytesRead, ref nativeOverlapped);
+            PInvoke.ReadFile(Volume.Handle, FATDataPtr, (uint)FATSize, out BytesRead, ref nativeOverlapped);
 
-            PInvoke.FATData FatData = new PInvoke.FATData(FATDataPtr, this.Type, FATSize);
+            PInvoke.FATData FatData = new PInvoke.FATData(FATDataPtr, Type, FATSize);
 
             return true;
         }
@@ -217,20 +214,20 @@ namespace Little_Disk_Defrag.Helpers.Partitions
             if (startCluster == 0)
                 return new byte[0];
 
-            for (i = 0; i < this.ClusterCount + 1; i++)
+            for (i = 0; i < ClusterCount + 1; i++)
             {
                 // Have we reached the end of the clusters?
-                if (((this.Type == FATTypes.FAT12) && (cluster >= 0xFF8)) ||
-                    ((this.Type == FATTypes.FAT16) && (cluster >= 0xFFF8)) ||
-                    ((this.Type == FATTypes.FAT32) && (cluster >= 0xFFFFFF8)))
+                if (((Type == FATTypes.FAT12) && (cluster >= 0xFF8)) ||
+                    ((Type == FATTypes.FAT16) && (cluster >= 0xFFF8)) ||
+                    ((Type == FATTypes.FAT32) && (cluster >= 0xFFFFFF8)))
                     break;
 
-                if ((cluster < 2) || (cluster > this.ClusterCount + 1))
+                if ((cluster < 2) || (cluster > ClusterCount + 1))
                     return new byte[0];
 
-                bufLen = bufLen + this.SectorsPerCluster * this.BytesPerSector;
+                bufLen = bufLen + SectorsPerCluster * BytesPerSector;
 
-                switch (this.Type)
+                switch (Type)
                 {
                     case FATTypes.FAT12:
                         {
@@ -243,7 +240,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
                         }
                     case FATTypes.FAT16:
                         {
-                            cluster = (ulong)fatData.FAT16[cluster];
+                            cluster = fatData.FAT16[cluster];
                             break;
                         }
                     case FATTypes.FAT32:
@@ -254,7 +251,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
                 }
             }
 
-            if (i >= this.ClusterCount + 1)
+            if (i >= ClusterCount + 1)
             {
                 Debug.WriteLine("Reached end of cluster count. This could mean the disk is corrupt.");
                 return new byte[0];
@@ -262,7 +259,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
 
             if (bufLen > uint.MaxValue)
             {
-                Debug.WriteLine("The directory is {0} bytes, which is too big", new object[] { bufLen });
+                Debug.WriteLine("The directory is {0} bytes, which is too big", bufLen);
                 return new byte[0];
             }
 

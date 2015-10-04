@@ -16,17 +16,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
 using Little_Disk_Defrag.Helpers.Partitions;
 using Little_Disk_Defrag.Misc;
 using Microsoft.Win32.SafeHandles;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Little_Disk_Defrag.Helpers
 {
@@ -38,24 +35,24 @@ namespace Little_Disk_Defrag.Helpers
         private PInvoke.DISK_GEOMETRY _geometry;
         private readonly List<string> _directoryList;
         private readonly List<FileInfo> _fileList;
-        private System.IO.DriveInfo _driveInfo;
+        private DriveInfo _driveInfo;
         private PartInfo _partInfo;
-        private System.IO.FileStream _driveStream;
+        private FileStream _driveStream;
 
         public PartInfo PartInfo
         {
-            get { return this._partInfo; }
+            get { return _partInfo; }
         }
 
-        public System.IO.FileStream DriveStream
+        public FileStream DriveStream
         {
-            get { return this._driveStream; }
+            get { return _driveStream; }
         }
 
         public PInvoke.DISK_GEOMETRY Geometry
         {
-            get { return this._geometry; }
-            set { this._geometry = value; }
+            get { return _geometry; }
+            set { _geometry = value; }
         }
 
         /// <summary>
@@ -64,53 +61,53 @@ namespace Little_Disk_Defrag.Helpers
         /// <example>C:\</example>
         public string RootPath
         {
-            get { return this._rootPath; }
+            get { return _rootPath; }
         }
 
         public List<string> Directories
         {
-            get { return this._directoryList; }
+            get { return _directoryList; }
         }
 
         public List<FileInfo> Files
         {
-            get { return this._fileList; }
+            get { return _fileList; }
         }
 
         public int DBFileCount
         {
-            get { return this._fileList.Count; }
+            get { return _fileList.Count; }
         }
 
         public int DBDirCount
         {
-            get { return this._directoryList.Count; }
+            get { return _directoryList.Count; }
         }
 
         public bool BitmapLoaded
         {
-            get { return (!((this.BitmapDetail == null) || this.BitmapDetail.Length == 0)); }
+            get { return (!((BitmapDetail == null) || BitmapDetail.Length == 0)); }
         }
 
-        public System.IO.DriveInfo DriveInfo
+        public DriveInfo DriveInfo
         {
-            get { return this._driveInfo; }
+            get { return _driveInfo; }
         }
 
         public DriveVolume()
         {
-            this._directoryList = new List<string>();
-            this._fileList = new List<FileInfo>();
+            _directoryList = new List<string>();
+            _fileList = new List<FileInfo>();
             
         }
 
         ~DriveVolume()
         {
-            this.Dispose(false);
+            Dispose(false);
         }
 
         #region IDisposable Implementation
-        private bool disposed = false;
+        private bool disposed;
 
         protected virtual void Dispose(bool disposing)
         {
@@ -136,9 +133,9 @@ namespace Little_Disk_Defrag.Helpers
         {
             bool retVal;
             string FileName = "\\\\.\\" + name;
-            this._rootPath = name + "\\";
+            _rootPath = name + "\\";
 
-            this.Handle = PInvoke.CreateFile(
+            Handle = PInvoke.CreateFile(
                 FileName,
                 //MAXIMUM_ALLOWED,                                  // access
 		        PInvoke.GENERIC_READ,
@@ -149,7 +146,7 @@ namespace Little_Disk_Defrag.Helpers
                 IntPtr.Zero                                         // template
             );
 
-            if (this.Handle.IsClosed || this.Handle.IsInvalid)
+            if (Handle.IsClosed || Handle.IsInvalid)
             {
                 Debug.WriteLine("Unable to open volume. Error #{0} occurred", Marshal.GetLastWin32Error());
 
@@ -158,14 +155,14 @@ namespace Little_Disk_Defrag.Helpers
             else
             {
                 // Get DriveInfo
-                this._driveInfo = new System.IO.DriveInfo(this._rootPath);
-                this._driveStream = new System.IO.FileStream(this.Handle, System.IO.FileAccess.Read);
+                _driveInfo = new DriveInfo(_rootPath);
+                _driveStream = new FileStream(Handle, FileAccess.Read);
 
                 // Detect filesystem
                 //if (this._driveInfo.DriveFormat.ToUpper() == "NTFS")
                 //    this._partInfo = new NTFS(this);
                 //else
-                    this._partInfo = new FAT(this);
+                    _partInfo = new FAT(this);
 
                 retVal = true;
             }
@@ -237,9 +234,9 @@ namespace Little_Disk_Defrag.Helpers
             Bitmap = new PInvoke.VOLUME_BITMAP_BUFFER(pDest, true);
             BitmapSize = (uint)Marshal.SizeOf(typeof(PInvoke.VOLUME_BITMAP_BUFFER)) + ((uint)Bitmap.BitmapSize.QuadPart / 8) + 1;
 
-            this.PartInfo.ClusterCount = (ulong)Bitmap.BitmapSize.QuadPart;
+            PartInfo.ClusterCount = Bitmap.BitmapSize.QuadPart;
 
-            this.BitmapDetail = Bitmap.Buffer;
+            BitmapDetail = Bitmap.Buffer;
 
             Marshal.FreeHGlobal(pDest);
 
@@ -248,17 +245,17 @@ namespace Little_Disk_Defrag.Helpers
 
         public bool IsClusterUsed (ulong Cluster)
         {
-            int[] BitShift = new int[] { 1, 2, 4, 8, 16, 32, 64, 128 };
-            int IsUsed = (this.BitmapDetail[Cluster / 8] & BitShift[Cluster % 8]);
+            int[] BitShift = { 1, 2, 4, 8, 16, 32, 64, 128 };
+            int IsUsed = (BitmapDetail[Cluster / 8] & BitShift[Cluster % 8]);
             return (IsUsed > 0);
         }
 
         public void SetCluster(ulong Cluster, bool Used)
         {
             if (Used)
-                this.BitmapDetail[Cluster / 8] = 0xFF; // 0xFF is always greater than 0 when AND with  1, 2, 4, 8, 16, 32, 64, and 128
+                BitmapDetail[Cluster / 8] = 0xFF; // 0xFF is always greater than 0 when AND with  1, 2, 4, 8, 16, 32, 64, and 128
             else
-                this.BitmapDetail[Cluster / 8] = 0;
+                BitmapDetail[Cluster / 8] = 0;
         }
 
         public bool BuildFileList (Defragment defrag)
@@ -267,7 +264,7 @@ namespace Little_Disk_Defrag.Helpers
             Directories.Clear();
             Directories.Add(RootPath);
 
-            BuildDBInfo Info = new BuildDBInfo(defrag, this, (this.PartInfo.TotalBytes - this.PartInfo.FreeBytes) / (UInt64)this.PartInfo.ClusterSize);
+            BuildDBInfo Info = new BuildDBInfo(defrag, this, (PartInfo.TotalBytes - PartInfo.FreeBytes) / PartInfo.ClusterSize);
 
             ScanDirectory (RootPath, BuildDBCallback, Info);
 
@@ -289,8 +286,8 @@ namespace Little_Disk_Defrag.Helpers
             if (DBInfo.QuitMonitor)
                 return (false);
 
-            DBInfo.ClusterProgress += (UInt64)Info.Clusters;
-            DBInfo.Percent = ((double)DBInfo.ClusterProgress / (double)DBInfo.ClusterCount) * 100.0f;
+            DBInfo.ClusterProgress += Info.Clusters;
+            DBInfo.Percent = (DBInfo.ClusterProgress / (double)DBInfo.ClusterCount) * 100.0f;
 
             return (true);
         }
@@ -333,7 +330,7 @@ namespace Little_Disk_Defrag.Helpers
                     UInt64 TotalClusters = 0;
 
                     foreach (Extent ext in Info.Fragments) {
-                        TotalClusters += (ulong)ext.Length;
+                        TotalClusters += ext.Length;
                     }
 
                     Info.Clusters = TotalClusters;
@@ -377,12 +374,12 @@ namespace Little_Disk_Defrag.Helpers
 
         public string GetDBDir(uint index)
         {
-            return this.Directories[(int)index];
+            return Directories[(int)index];
         }
 
         public FileInfo GetDBFile(uint index)
         {
-            return this.Files[(int)index];
+            return Files[(int)index];
         }
 
         private bool ShouldProcess (FileAttr Attr)
@@ -398,7 +395,7 @@ namespace Little_Disk_Defrag.Helpers
             Info.Fragments.Clear();
 
             bool Result;
-            string FullName = this.GetDBDir(Info.DirIndice) + Info.Name;
+            string FullName = GetDBDir(Info.DirIndice) + Info.Name;
             PInvoke.BY_HANDLE_FILE_INFORMATION FileInfo;
 
             if ((Handle == null) || Handle.IsClosed || Handle.IsInvalid)
@@ -510,11 +507,11 @@ namespace Little_Disk_Defrag.Helpers
             {
                 Extent Add;
 
-                Add.StartLCN = Retrieval.Extents[(int)i].Lcn.QuadPart;
+                Add.StartLCN = Retrieval.Extents[i].Lcn.QuadPart;
                 if (i != 0)
-                    Add.Length = Retrieval.Extents[(int)i].NextVcn.QuadPart - (ulong)Retrieval.Extents[(int)i - 1].NextVcn.QuadPart;
+                    Add.Length = Retrieval.Extents[i].NextVcn.QuadPart - Retrieval.Extents[i - 1].NextVcn.QuadPart;
                 else
-                    Add.Length = Retrieval.Extents[(int)i].NextVcn.QuadPart - Retrieval.StartingVcn.QuadPart;
+                    Add.Length = Retrieval.Extents[i].NextVcn.QuadPart - Retrieval.StartingVcn.QuadPart;
 
                 Info.Fragments.Add(Add);
             }
@@ -532,7 +529,7 @@ namespace Little_Disk_Defrag.Helpers
 
             LCNResult = 0;
 
-            for (i = StartLCN; i < this.PartInfo.ClusterCount; i++)
+            for (i = StartLCN; i < PartInfo.ClusterCount; i++)
             {
                 bool Found = true;
 
@@ -547,7 +544,7 @@ namespace Little_Disk_Defrag.Helpers
                 // Check the whole darn range.
                 for (j = (i + 1); j < (i + ReqLength - 2); j++)
                 {
-                    if (IsClusterUsed(j) == true)
+                    if (IsClusterUsed(j))
                     {
                         Found = false;
                         break;
@@ -556,11 +553,8 @@ namespace Little_Disk_Defrag.Helpers
 
                 if (!Found)
                     continue;
-                else
-                {
-                    LCNResult = i;
-                    return true;
-                }
+                LCNResult = i;
+                return true;
             }
 
             return false;
@@ -686,8 +680,8 @@ namespace Little_Disk_Defrag.Helpers
                             //BitmapDetail[CurrentLCN + j].Allocated = true;
                         }
 
-                        CurrentLCN += (ulong)Info.Fragments[i].Length;
-                        CurrentVCN += (ulong)Info.Fragments[i].Length;
+                        CurrentLCN += Info.Fragments[i].Length;
+                        CurrentVCN += Info.Fragments[i].Length;
                     }
                 }
                 catch

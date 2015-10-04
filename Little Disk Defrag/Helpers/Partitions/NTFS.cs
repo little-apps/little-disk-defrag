@@ -1,10 +1,5 @@
-﻿using Little_Disk_Defrag.Helpers;
-using Little_Disk_Defrag.Misc;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Little_Disk_Defrag.Helpers.Partitions
 {
@@ -18,13 +13,13 @@ namespace Little_Disk_Defrag.Helpers.Partitions
 
         public LinkedList<MFTEntry> MFTEntries
         {
-            get { return this._mftEntries; }
+            get { return _mftEntries; }
         }
 
         public NTFS(DriveVolume volume) 
             : base(volume)
         {
-            this._mftEntries = new LinkedList<MFTEntry>();
+            _mftEntries = new LinkedList<MFTEntry>();
         }
 
         public override bool GetPartitionDetails()
