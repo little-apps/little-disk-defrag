@@ -30,39 +30,29 @@ namespace Little_Disk_Defrag.Helpers
 
     public class FileInfo
     {
-        private readonly string _name;
-        private readonly uint _dirIndice;
-        private readonly UInt64 _size;
-        private UInt64 _clusters;
-        private readonly FileAttr _attributes;
-        private readonly List<Extent> _fragments;
-
-        public string Name => _name;
+        public string Name { get; }
 
         /// <summary>
         /// Indice into directory list
         /// </summary>
-        public uint DirIndice => _dirIndice;
+        public uint DirIndice { get; }
 
-        public UInt64 Size => _size;
+        public UInt64 Size { get; }
 
-        public UInt64 Clusters
-        {
-            get { return _clusters; }
-            set { _clusters = value; }
-        }
-        public FileAttr Attributes => _attributes;
+        public UInt64 Clusters { get; set; }
 
-        public List<Extent> Fragments => _fragments;
+        public FileAttr Attributes { get; }
+
+        public List<Extent> Fragments { get; }
 
         public FileInfo(string name, uint indice, UInt64 size, FileAttributes fileAttrs)
         {
-            _name = name;
-            _dirIndice = indice;
-            _size = size;
+            Name = name;
+            DirIndice = indice;
+            Size = size;
 
-            _fragments = new List<Extent>();
-            _attributes = new FileAttr(fileAttrs);
+            Fragments = new List<Extent>();
+            Attributes = new FileAttr(fileAttrs);
         }
     }
 }

@@ -5,18 +5,17 @@ namespace Little_Disk_Defrag.Helpers.Partitions
 {
     public class NTFS : PartInfo
     {
-        private readonly LinkedList<MFTEntry> _mftEntries;
         private ulong _mftStartLcn;
         private ulong _mft2StartLcn;
         private ulong _bytesPerMftRecord;
         private ulong _clustersPerIndexRecord;
 
-        public LinkedList<MFTEntry> MFTEntries => _mftEntries;
+        public LinkedList<MFTEntry> MFTEntries { get; }
 
         public NTFS(DriveVolume volume) 
             : base(volume)
         {
-            _mftEntries = new LinkedList<MFTEntry>();
+            MFTEntries = new LinkedList<MFTEntry>();
         }
 
         public override bool GetPartitionDetails()

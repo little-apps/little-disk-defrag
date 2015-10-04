@@ -69,8 +69,6 @@ namespace Little_Disk_Defrag
 
         private static double ThreadSafeWidth = double.NaN;
 
-        private DriveVolume _volume;
-
         private Draw draw;
 
         private Task _drawTask;
@@ -92,7 +90,7 @@ namespace Little_Disk_Defrag
 
         private DispatcherTimer timer;
 
-        private DriveVolume Volume => _volume;
+        private DriveVolume Volume { get; set; }
 
         public Drawing()
         {
@@ -113,7 +111,7 @@ namespace Little_Disk_Defrag
 
         public void SetDriveVolume(DriveVolume vol)
         {
-            _volume = vol;
+            Volume = vol;
 
             Redraw();
         }

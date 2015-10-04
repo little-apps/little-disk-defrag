@@ -31,46 +31,35 @@ namespace Little_Disk_Defrag.Helpers
     {
         public SafeFileHandle Handle;
         private byte[] BitmapDetail;
-        private string _rootPath;
-        private PInvoke.DISK_GEOMETRY _geometry;
-        private readonly List<string> _directoryList;
-        private readonly List<FileInfo> _fileList;
-        private DriveInfo _driveInfo;
-        private PartInfo _partInfo;
-        private FileStream _driveStream;
 
-        public PartInfo PartInfo => _partInfo;
+        public PartInfo PartInfo { get; private set; }
 
-        public FileStream DriveStream => _driveStream;
+        public FileStream DriveStream { get; private set; }
 
-        public PInvoke.DISK_GEOMETRY Geometry
-        {
-            get { return _geometry; }
-            set { _geometry = value; }
-        }
+        public PInvoke.DISK_GEOMETRY Geometry { get; set; }
 
         /// <summary>
         /// Location of volume (with leading slash)
         /// </summary>
         /// <example>C:\</example>
-        public string RootPath => _rootPath;
+        public string RootPath { get; private set; }
 
-        public List<string> Directories => _directoryList;
+        public List<string> Directories { get; }
 
-        public List<FileInfo> Files => _fileList;
+        public List<FileInfo> Files { get; }
 
-        public int DBFileCount => _fileList.Count;
+        public int DBFileCount => Files.Count;
 
-        public int DBDirCount => _directoryList.Count;
+        public int DBDirCount => Directories.Count;
 
         public bool BitmapLoaded => (!((BitmapDetail == null) || BitmapDetail.Length == 0));
 
-        public DriveInfo DriveInfo => _driveInfo;
+        public DriveInfo DriveInfo { get; private set; }
 
         public DriveVolume()
         {
-            _directoryList = new List<string>();
-            _fileList = new List<FileInfo>();
+            Directories = new List<string>();
+            Files = new List<FileInfo>();
             
         }
 
@@ -106,7 +95,7 @@ namespace Little_Disk_Defrag.Helpers
         {
             bool retVal;
             string FileName = "\\\\.\\" + name;
-            _rootPath = name + "\\";
+            RootPath = name + "\\";
 
             Handle = PInvoke.CreateFile(
                 FileName,
@@ -128,14 +117,14 @@ namespace Little_Disk_Defrag.Helpers
             else
             {
                 // Get DriveInfo
-                _driveInfo = new DriveInfo(_rootPath);
-                _driveStream = new FileStream(Handle, FileAccess.Read);
+                DriveInfo = new DriveInfo(RootPath);
+                DriveStream = new FileStream(Handle, FileAccess.Read);
 
                 // Detect filesystem
                 //if (this._driveInfo.DriveFormat.ToUpper() == "NTFS")
                 //    this._partInfo = new NTFS(this);
                 //else
-                    _partInfo = new FAT(this);
+                    PartInfo = new FAT(this);
 
                 retVal = true;
             }

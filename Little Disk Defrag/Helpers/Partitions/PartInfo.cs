@@ -9,93 +9,33 @@ namespace Little_Disk_Defrag.Helpers.Partitions
     {
         protected DriveVolume _vol;
 
-        private string _name;
-        private string _serial;
-        private ulong _maxNameLen;
-        private string _fileSystem;
-        private ulong _clusterCount;
-        private uint _clusterSize;
-        private ulong _totalBytes;
-        private ulong _freeBytes;
-        private uint _sectorsPerCluster;
-        private ulong _bytesPerCluster;
-        private uint _bytesPerSector;
-        private uint _freeClusters;
-        private uint _totalSectors;
-        private uint _totalClusters;
+        public string Name { get; set; }
 
-        public string Name
-        {
-            get { return _name; }
-            set { _name = value; }
-        }
-        public string Serial
-        {
-            get { return _serial; }
-            set { _serial = value; }
-        }
-        public ulong MaxNameLen
-        {
-            get { return _maxNameLen; }
-            set { _maxNameLen = value; }
-        }
-        public string FileSystem
-        {
-            get { return _fileSystem; }
-            set { _fileSystem = value; }
-        }
-        public UInt64 ClusterCount
-        {
-            get { return _clusterCount; }
-            set { _clusterCount = value; }
-        }
-        public uint ClusterSize
-        {
-            get { return _clusterSize; }
-            set { _clusterSize = value; }
-        }
-        public UInt64 TotalBytes
-        {
-            get { return _totalBytes; }
-            set { _totalBytes = value; }
-        }
-        public UInt64 FreeBytes
-        {
-            get { return _freeBytes; }
-            set { _freeBytes = value; }
-        }
+        public string Serial { get; set; }
 
-        public uint SectorsPerCluster
-        {
-            get { return _sectorsPerCluster; }
-            set { _sectorsPerCluster = value; }
-        }
-        public ulong BytesPerCluster
-        {
-            get { return _bytesPerCluster; }
-            set { _bytesPerCluster = value; }
-        }
-        public uint BytesPerSector
-        {
-            get { return _bytesPerSector; }
-            set { _bytesPerSector = value; }
-        }
-        public uint FreeClusters
-        {
-            get { return _freeClusters; }
-            set { _freeClusters = value; }
-        }
-        public uint TotalSectors
-        {
-            get { return _totalSectors; }
-            set { _totalSectors = value; }
-        }
+        public ulong MaxNameLen { get; set; }
 
-        public uint TotalClusters
-        {
-            get { return _totalClusters; }
-            set { _totalClusters = value; }
-        }
+        public string FileSystem { get; set; }
+
+        public UInt64 ClusterCount { get; set; }
+
+        public uint ClusterSize { get; set; }
+
+        public UInt64 TotalBytes { get; set; }
+
+        public UInt64 FreeBytes { get; set; }
+
+        public uint SectorsPerCluster { get; set; }
+
+        public ulong BytesPerCluster { get; set; }
+
+        public uint BytesPerSector { get; set; }
+
+        public uint FreeClusters { get; set; }
+
+        public uint TotalSectors { get; set; }
+
+        public uint TotalClusters { get; set; }
 
         public DriveVolume Volume => _vol;
 

@@ -27,15 +27,8 @@ namespace Little_Disk_Defrag.Helpers
         public enum DefragMethod { ANALYZE, FASTDEFRAG, NORMDEFRAG };
 
         private DateTime _lastBMPUpdate; // Last time volume bitmap was updated
-        private DefragReport _defragReport;
-        private bool _doLimitLength;
-        private DefragMethod _method;
-        private string _driveName;
-        private DriveVolume _driveVolume;
         private string _statusString;
         private double _statusPercent;
-        private bool _showReport;
-        private bool _updateDrawing;
 
         private object _lock = new object();
 
@@ -44,26 +37,18 @@ namespace Little_Disk_Defrag.Helpers
         public bool PleaseStop;
         public bool PleasePause;
 
-        public DefragMethod DefragType => _method;
+        public DefragMethod DefragType { get; private set; }
 
         /// <summary>
         /// Limit length of status string to 70 chars?
         /// </summary>
-        public bool DoLimitLength
-        {
-            get { return _doLimitLength; }
-            set { _doLimitLength = value; }
-        }
+        public bool DoLimitLength { get; set; }
 
         public bool IsDoneYet => Done;
 
         public bool HasError => Error;
 
-        public bool ShowReport
-        {
-            get { return _showReport; }
-            set { _showReport = value; }
-        }
+        public bool ShowReport { get; set; }
 
         public string StatusString
         {
@@ -95,22 +80,19 @@ namespace Little_Disk_Defrag.Helpers
             }
         }
 
-        public string DriveName => _driveName;
+        public string DriveName { get; private set; }
 
-        public DefragReport Report => _defragReport;
-        public DriveVolume Volume => _driveVolume;
+        public DefragReport Report { get; }
+
+        public DriveVolume Volume { get; private set; }
 
         public bool VolumeOpen { get; set; }
 
-        public bool UpdateDrawing
-        {
-            get { return _updateDrawing; }
-            set { _updateDrawing = value; }
-        }
+        public bool UpdateDrawing { get; set; }
 
         public Defragment()
         {
-            _defragReport = new DefragReport();
+            Report = new DefragReport();
 
             Reset();
             
@@ -130,9 +112,9 @@ namespace Little_Disk_Defrag.Helpers
 
         public void Open(string volume, bool silent = false)
         {
-            _driveVolume = new DriveVolume();
+            Volume = new DriveVolume();
 
-            _driveName = volume;
+            DriveName = volume;
 
             if (!silent)
                 StatusString = "Opening volume " + volume;
@@ -175,7 +157,7 @@ namespace Little_Disk_Defrag.Helpers
 
         public void SetMethod(DefragMethod method)
         {
-            _method = method;
+            DefragType = method;
         }
 
         public void CloseVolume()
@@ -183,7 +165,7 @@ namespace Little_Disk_Defrag.Helpers
             if (!VolumeOpen)
                 return;
 
-            if (_driveVolume == null)
+            if (Volume == null)
                 return;
 
             Volume.Dispose();
@@ -212,7 +194,7 @@ namespace Little_Disk_Defrag.Helpers
                 else
                     StatusString = "Finished defragmenting " + DriveName;
 
-                _driveName = "";
+                DriveName = "";
 
                 if (!Error && !PleaseStop)
                     ShowReport = true; // causes report window to open
@@ -326,7 +308,7 @@ namespace Little_Disk_Defrag.Helpers
                 }
 
                 // Analyze?
-                if (_method == DefragMethod.ANALYZE)
+                if (DefragType == DefragMethod.ANALYZE)
                 {
                     uint j;
 
@@ -449,7 +431,7 @@ namespace Little_Disk_Defrag.Helpers
                         //       are consolidated. I.e. we assume it is NOT the case that
                         //       two extents account for a sequential range of (non-
                         //       fragmented) clusters.
-                        if (Info.Fragments.Count == 1 && _method == DefragMethod.FASTDEFRAG)
+                        if (Info.Fragments.Count == 1 && DefragType == DefragMethod.FASTDEFRAG)
                             continue;
 
                         // Otherwise, defrag0rize it!
@@ -465,7 +447,7 @@ namespace Little_Disk_Defrag.Helpers
                                 // If we're doing an extensive defrag and the file is already defragmented
                                 // and if its new location would be after its current location, don't
                                 // move it.
-                                if (_method == DefragMethod.NORMDEFRAG && Info.Fragments.Count == 1 && TargetLCN > Info.Fragments[0].StartLCN)
+                                if (DefragType == DefragMethod.NORMDEFRAG && Info.Fragments.Count == 1 && TargetLCN > Info.Fragments[0].StartLCN)
                                 {
                                     Retry = 1;
                                 }

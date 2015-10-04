@@ -22,14 +22,9 @@ namespace Little_Disk_Defrag.Helpers
 {
     public class BuildDBInfo
     {
-        private readonly Defragment _defrag;
-        private readonly DriveVolume _volume;
-        private readonly UInt64 _clusterCount;
-        private UInt64 _clusterProgress;
+        public Defragment Defrag { get; }
 
-        public Defragment Defrag => _defrag;
-
-        public DriveVolume Volume => _volume;
+        public DriveVolume Volume { get; }
 
         public double Percent
         {
@@ -42,19 +37,15 @@ namespace Little_Disk_Defrag.Helpers
             set { Defrag.PleaseStop = value; }
         }
 
-        public UInt64 ClusterCount => _clusterCount;
+        public UInt64 ClusterCount { get; }
 
-        public UInt64 ClusterProgress
-        {
-            get { return _clusterProgress; }
-            set { _clusterProgress = value; }
-        }
+        public UInt64 ClusterProgress { get; set; }
 
         public BuildDBInfo(Defragment defrag, DriveVolume volume, UInt64 clusterCount)
         {
-            _defrag = defrag;
-            _volume = volume;
-            _clusterCount = clusterCount;
+            Defrag = defrag;
+            Volume = volume;
+            ClusterCount = clusterCount;
         }
     }
 }

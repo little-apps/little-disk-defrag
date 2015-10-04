@@ -10,34 +10,13 @@ namespace Little_Disk_Defrag.Helpers.Partitions
     {
         public enum FATTypes { FAT12, FAT16, FAT32 };
 
-        private FATTypes _fatType;
-        private ulong _firstDataSector;
-        private ulong _dataSector;
-        private ulong _rootDirSectors;
+        public FATTypes Type { get; set; }
 
-        public FATTypes Type
-        {
-            get { return _fatType; }
-            set { _fatType = value; }
-        }
+        public ulong FirstDataSector { get; set; }
 
-        public ulong FirstDataSector
-        {
-            get { return _firstDataSector; }
-            set { _firstDataSector = value; }
-        }
+        public ulong DataSector { get; set; }
 
-        public ulong DataSector
-        {
-            get { return _dataSector; }
-            set { _dataSector = value; }
-        }
-
-        public ulong RootDirSectors
-        {
-            get { return _rootDirSectors; }
-            set { _rootDirSectors = value; }
-        }
+        public ulong RootDirSectors { get; set; }
 
         public FAT(DriveVolume volume) 
             : base(volume)

@@ -23,10 +23,6 @@ namespace Little_Disk_Defrag.Helpers
 {
     public class DefragReport
     {
-        readonly List<uint> _fraggedFiles;
-        readonly List<uint> _unfraggedFiles;
-        readonly List<uint> _unmovableFiles;
-
         public string RootPath;
         public string Label;
         public string Serial;
@@ -47,16 +43,17 @@ namespace Little_Disk_Defrag.Helpers
 
         public double AverageFragments => FilesFragments / (double)FilesCount;
 
-        public List<uint> FraggedFiles => _fraggedFiles;
+        public List<uint> FraggedFiles { get; }
 
-        public List<uint> UnfraggedFiles => _unfraggedFiles;
-        public List<uint> UnmovableFiles => _unmovableFiles;
+        public List<uint> UnfraggedFiles { get; }
+
+        public List<uint> UnmovableFiles { get; }
 
         public DefragReport()
         {
-            _fraggedFiles = new List<uint>();
-            _unfraggedFiles = new List<uint>();
-            _unmovableFiles = new List<uint>();
+            FraggedFiles = new List<uint>();
+            UnfraggedFiles = new List<uint>();
+            UnmovableFiles = new List<uint>();
         }
     }
 }

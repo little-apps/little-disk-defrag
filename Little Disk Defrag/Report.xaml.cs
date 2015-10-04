@@ -39,9 +39,6 @@ namespace Little_Disk_Defrag
 
         #endregion
 
-        private readonly Defragment _defragger; 
-        private readonly DefragReport _defragReport;
-
         private string _driveLetter;
         private string _dirCount;
         private string _volLabel;
@@ -59,7 +56,6 @@ namespace Little_Disk_Defrag
         private string _clusterSize;
         private string _recommendations;
         private int _selectedIndexUnit;
-        private readonly string[] _units;
 
         public string DriveLetter
         {
@@ -220,7 +216,7 @@ namespace Little_Disk_Defrag
             {
                 _selectedIndexUnit = value;
 
-                if (_defragger != null)
+                if (Defragger != null)
                     UpdateData();
 
                 OnPropertyChanged("SelectedIndexUnit");
@@ -229,23 +225,23 @@ namespace Little_Disk_Defrag
 
         public string SelectedUnit => Units[SelectedIndexUnit];
 
-        public string[] Units => _units;
+        public string[] Units { get; }
 
-        public Defragment Defragger => _defragger;
+        public Defragment Defragger { get; }
 
-        public DefragReport DefragReport => _defragReport;
+        public DefragReport DefragReport { get; }
 
         public Report(Defragment defragger)
         {
             InitializeComponent();
 
-            _units = new[] { "Bytes", "Kilobytes", "Megabytes", "Gigabytes" };
+            Units = new[] { "Bytes", "Kilobytes", "Megabytes", "Gigabytes" };
             OnPropertyChanged("Units");
 
             SelectedIndexUnit = 0;
 
-            _defragger = defragger;
-            _defragReport = defragger.Report;
+            Defragger = defragger;
+            DefragReport = defragger.Report;
 
             UpdateData();
         }

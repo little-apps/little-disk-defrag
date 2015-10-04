@@ -45,10 +45,6 @@ namespace Little_Disk_Defrag
 
         #endregion
 
-        private readonly List<string> _drives;
-        private readonly List<string> _actions;
-        private readonly List<string> _priorities;
-
         private string _selectedDrive;
         private string _selectedAction;
         private string _selectedPriority;
@@ -66,10 +62,11 @@ namespace Little_Disk_Defrag
 
         private DispatcherTimer _resizeTimer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 0, 1500), IsEnabled = false };
 
-        public List<string> Drives => _drives;
+        public List<string> Drives { get; }
 
-        public List<string> Actions => _actions;
-        public List<string> Priorities => _priorities;
+        public List<string> Actions { get; }
+
+        public List<string> Priorities { get; }
 
         public bool IsDefragmentActive => ((_thread != null) && _thread.IsAlive);
 
@@ -182,7 +179,7 @@ namespace Little_Disk_Defrag
             _timer = new Timer(UpdateDialog);
             _timer.Change(0, 25);
 
-            _drives = new List<string>();
+            Drives = new List<string>();
 
             foreach (DriveInfo di in DriveInfo.GetDrives())
             {
@@ -190,8 +187,8 @@ namespace Little_Disk_Defrag
                     Drives.Add(di.ToString().Substring(0,2));
             }
 
-            _actions = new List<string>(new[] { "Analyze", "Fast Defrag", "Normal Defrag" });
-            _priorities = new List<string>(new[] { "High", "Above Normal", "Normal", "Below Normal", "Idle" });
+            Actions = new List<string>(new[] { "Analyze", "Fast Defrag", "Normal Defrag" });
+            Priorities = new List<string>(new[] { "High", "Above Normal", "Normal", "Below Normal", "Idle" });
 
             OnPropertyChanged("Drives");
             OnPropertyChanged("Actions");
