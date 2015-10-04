@@ -57,7 +57,6 @@ namespace Little_Disk_Defrag
 
         private readonly Defragment _defragger = new Defragment();
         private Thread _thread;
-        private readonly Timer _timer;
 
         private readonly DispatcherTimer _resizeTimer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 0, 1500), IsEnabled = false };
 
@@ -175,8 +174,8 @@ namespace Little_Disk_Defrag
 
             _resizeTimer.Tick += _resizeTimer_Tick;
 
-            _timer = new Timer(UpdateDialog);
-            _timer.Change(0, 25);
+            var timer = new Timer(UpdateDialog);
+            timer.Change(0, 25);
 
             Drives = new List<string>();
 

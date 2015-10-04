@@ -181,7 +181,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
             return true;
         }
 
-        private byte[] LoadDir(PInvoke.FATData fatData, ulong startCluster, ref ulong outLen)
+        private byte[] LoadDir(PInvoke.FATData fatData, ulong startCluster, out ulong outLen)
         {
             ulong bufLen = 0;
             ulong i;

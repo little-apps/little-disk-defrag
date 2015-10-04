@@ -62,14 +62,14 @@ namespace Little_Disk_Defrag.Misc
                 {
                     isAdmin = false;
 #if (DEBUG)
-                    throw ex;
+                    throw;
 #endif
                 }
                 catch (Exception ex)
                 {
                     isAdmin = false;
 #if (DEBUG)
-                    throw ex;
+                    throw;
 #endif
                 }
                 return isAdmin;

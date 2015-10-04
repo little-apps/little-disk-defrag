@@ -1,7 +1,7 @@
-﻿using Little_Disk_Defrag.Misc;
-using System;
+﻿using System;
 using System.Threading;
 using System.Windows;
+using Little_Disk_Defrag.Misc;
 
 namespace Little_Disk_Defrag
 {
@@ -27,7 +27,7 @@ namespace Little_Disk_Defrag
 
         public App()
         {
-            StartupUri = new System.Uri("MainWindow.xaml", UriKind.Relative);
+            StartupUri = new Uri("MainWindow.xaml", UriKind.Relative);
 
             // Add resources
             //this.Resources.MergedDictionaries.Add(new ResourceDictionary() { Source = new System.Uri("Themes/Generic.xaml", UriKind.Relative) });

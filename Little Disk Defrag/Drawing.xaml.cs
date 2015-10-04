@@ -49,9 +49,6 @@ namespace Little_Disk_Defrag
             get { return _blockSize; }
             set
             {
-                if (_blockSize == value)
-                    return;
-
                 _blockSize = value;
             }
         }
@@ -140,11 +137,9 @@ namespace Little_Disk_Defrag
             if (double.IsNaN(width) || double.IsNaN(height))
                 return;
 
-            if (width != Width)
-                Width = width;
+            Width = width;
 
-            if (height != Height)
-                Height = height;
+            Height = height;
         }
 
         public async void Redraw()
@@ -213,7 +208,9 @@ namespace Little_Disk_Defrag
 
             // Wait until width is not NaN
             while (double.IsNaN(GetWidth()))
-                continue;
+            {
+                
+            }
 
             ThreadSafeWidth = GetWidth();
 
@@ -283,7 +280,7 @@ namespace Little_Disk_Defrag
                             {
                                 lastLcn = null;
                             }
-                            else if (cluster2.HasValue)
+                            else
                             {
                                 numFree2 += numFree;
                                 //cFreeSpaceGaps++;
@@ -312,8 +309,7 @@ namespace Little_Disk_Defrag
                                 DrawBlocks(lastCluster, cluster.Value, ColFile);
                             }
 
-                            if (!cluster2.HasValue)
-                                cluster2 = cluster;
+                            cluster2 = cluster;
 
                             numFree = 1;
                             numFree3++;
