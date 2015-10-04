@@ -12,10 +12,5 @@
         public ulong Vcn;
         public bool fragmented;
         public bool locked;
-
-        public MFTEntry()
-        {
-
-        }
     }
 }
