@@ -94,11 +94,9 @@ namespace Little_Disk_Defrag.Misc
 
         internal static uint LighterVal(uint col, int val)
         {
-            uint r, g, b;
-
-            b = ((col >> 16) & 0xFF) + (uint)((float)val / 255 * 256);
-            g = ((col >> 8) & 0xFF) + (uint)((float)val / 255 * 256);
-            r = ((col & 0xFF) + (uint)((float)val / 255 * 256));
+            var b = ((col >> 16) & 0xFF) + (uint)((float)val / 255 * 256);
+            var g = ((col >> 8) & 0xFF) + (uint)((float)val / 255 * 256);
+            var r = ((col & 0xFF) + (uint)((float)val / 255 * 256));
 
             if (r > 255)
                 r = 255;
@@ -121,14 +119,12 @@ namespace Little_Disk_Defrag.Misc
 
         internal static string FitName (string path, string filename, int totalWidth)
         {
-	        int pathLen;
-	        int fnLen;
-	        int halfTotLen;
+            int halfTotLen;
 	        int len4fn=0;     /* number of chars remaining for filename after path is applied */
 	        int len4path=0;   /* number of chars for path before filename is applied          */
 
-	        pathLen = path.Length;
-	        fnLen = filename.Length;
+	        var pathLen = path.Length;
+	        var fnLen = filename.Length;
 	        if ((totalWidth % 2) <= 0)
 		        halfTotLen=totalWidth / 2;
 	        else

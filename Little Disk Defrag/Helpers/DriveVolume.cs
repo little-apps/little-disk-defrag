@@ -139,30 +139,25 @@ namespace Little_Disk_Defrag.Helpers
         public bool GetBitmap()
         {
             Int64 StartingLCN = 0;
-            IntPtr StartingLCNPtr;
-            PInvoke.VOLUME_BITMAP_BUFFER Bitmap;
-            UInt32 BitmapSize;
             uint BytesReturned = 0;
-            bool Result;
-            IntPtr pDest;
 
             GCHandle handle = GCHandle.Alloc(StartingLCN, GCHandleType.Pinned);
-            StartingLCNPtr = handle.AddrOfPinnedObject();
+            var StartingLCNPtr = handle.AddrOfPinnedObject();
 
             //BitmapSize = (uint)Marshal.SizeOf(typeof(PInvoke.VOLUME_BITMAP_BUFFER)) + 4;
-            BitmapSize = 28;
+            uint BitmapSize = 28;
 
-            pDest = Marshal.AllocHGlobal((int)BitmapSize);
+            var pDest = Marshal.AllocHGlobal((int)BitmapSize);
 
-            Result = PInvoke.DeviceIoControl(
-                    Handle,
-                    PInvoke.FSConstants.FSCTL_GET_VOLUME_BITMAP,
-                    StartingLCNPtr,
-                    (uint)Marshal.SizeOf(StartingLCN),
-                    pDest,
-                    BitmapSize,
-                    ref BytesReturned,
-                    IntPtr.Zero);
+            var Result = PInvoke.DeviceIoControl(
+                Handle,
+                PInvoke.FSConstants.FSCTL_GET_VOLUME_BITMAP,
+                StartingLCNPtr,
+                (uint)Marshal.SizeOf(StartingLCN),
+                pDest,
+                BitmapSize,
+                ref BytesReturned,
+                IntPtr.Zero);
 
             // Bad result?
             if (Result == false && Marshal.GetLastWin32Error() != PInvoke.ERROR_MORE_DATA)
@@ -171,7 +166,7 @@ namespace Little_Disk_Defrag.Helpers
                 return false;
             }
 
-            Bitmap = new PInvoke.VOLUME_BITMAP_BUFFER(pDest, false);
+            var Bitmap = new PInvoke.VOLUME_BITMAP_BUFFER(pDest, false);
 
             BitmapSize = (uint)Marshal.SizeOf(typeof(PInvoke.VOLUME_BITMAP_BUFFER)) + ((uint)Bitmap.BitmapSize.QuadPart / 8) + 1;
             pDest = Marshal.ReAllocHGlobal(pDest, (IntPtr)BitmapSize);
@@ -261,15 +256,12 @@ namespace Little_Disk_Defrag.Helpers
         public bool ScanDirectory(string DirPrefix, ScanCallback Callback, BuildDBInfo UserData)
         {
             PInvoke.WIN32_FIND_DATA FindData;
-            IntPtr FindHandle;
-            string SearchString;
-            uint DirIndice;
 
-            DirIndice = (uint)Directories.Count - 1;
+            var DirIndice = (uint)Directories.Count - 1;
 
-            SearchString = DirPrefix + "*";
+            var SearchString = DirPrefix + "*";
 
-            FindHandle = PInvoke.FindFirstFile(SearchString, out FindData);
+            var FindHandle = PInvoke.FindFirstFile(SearchString, out FindData);
 
             if (FindHandle == PInvoke.INVALID_HANDLE_VALUE)
                 return false;
@@ -280,7 +272,6 @@ namespace Little_Disk_Defrag.Helpers
 
                 FileInfo Info = new FileInfo(FindData.cFileName, DirIndice, FileSize, FindData.dwFileAttributes);
                 SafeFileHandle Handle = null;
-                bool CallbackResult;
 
                 // DonLL't ever include '.L' and '..'
                 if (Info.Name == "."  || Info.Name == "..")
@@ -309,7 +300,7 @@ namespace Little_Disk_Defrag.Helpers
                     Info.Attributes.Process = ShouldProcess(Info.Attributes);
 
                 // Run the user-defined callback function
-                CallbackResult = Callback(ref Info, ref Handle, ref UserData);
+                var CallbackResult = Callback(ref Info, ref Handle, ref UserData);
 
                 if (!Handle.IsInvalid && !Handle.IsClosed)
                     Handle.Close();
@@ -320,9 +311,7 @@ namespace Little_Disk_Defrag.Helpers
                 // If directory, perform recursion
                 if (Info.Attributes.Directory)
                 {
-                    string Dir;
-
-                    Dir = GetDBDir (Info.DirIndice);
+                    var Dir = GetDBDir (Info.DirIndice);
                     Dir += Info.Name;
                     Dir += "\\";
 
@@ -358,7 +347,6 @@ namespace Little_Disk_Defrag.Helpers
         {
             Info.Fragments.Clear();
 
-            bool Result;
             string FullName = GetDBDir(Info.DirIndice) + Info.Name;
             PInvoke.BY_HANDLE_FILE_INFORMATION FileInfo;
 
@@ -383,7 +371,7 @@ namespace Little_Disk_Defrag.Helpers
                 return false;
             }
 
-            Result = PInvoke.GetFileInformationByHandle (Handle, out FileInfo);
+            var Result = PInvoke.GetFileInformationByHandle (Handle, out FileInfo);
 
             if (!Result)
             {
@@ -396,17 +384,14 @@ namespace Little_Disk_Defrag.Helpers
 
             // Get cluster allocation information
             PInvoke.LARGE_INTEGER StartingVCN = new PInvoke.LARGE_INTEGER();
-            PInvoke.RETRIEVAL_POINTERS_BUFFER Retrieval;
             IntPtr pDest = IntPtr.Zero;
-            uint RetSize;
-            uint Extents;
             uint BytesReturned = 0;
 
             // Grab info one extent at a time, until it's done grabbing all the extent data
             // Yeah, well it doesn't give us a way to ask L"how many extents?" that I know of ...
             // btw, the Extents variable tends to only reflect memory usage, so when we have
             // all the extents we look at the structure Win32 gives us for the REAL count!
-            Extents = 10;
+            uint Extents = 10;
 
             const uint RETRIEVAL_POINTERS_BUFFER_SIZE = 28;
 
@@ -418,7 +403,7 @@ namespace Little_Disk_Defrag.Helpers
             do
             {
                 Extents *= 2;
-                RetSize = RETRIEVAL_POINTERS_BUFFER_SIZE + (uint)((Extents - 1) * Marshal.SizeOf(typeof(PInvoke.LARGE_INTEGER)) * 2);
+                var RetSize = RETRIEVAL_POINTERS_BUFFER_SIZE + (uint)((Extents - 1) * Marshal.SizeOf(typeof(PInvoke.LARGE_INTEGER)) * 2);
 
                 pDest = pDest != IntPtr.Zero ? Marshal.ReAllocHGlobal(pDest, (IntPtr)RetSize) : Marshal.AllocHGlobal((int)RetSize);
 
@@ -454,7 +439,7 @@ namespace Little_Disk_Defrag.Helpers
                 }
             } while (!Result);
 
-            Retrieval = new PInvoke.RETRIEVAL_POINTERS_BUFFER(pDest);
+            var Retrieval = new PInvoke.RETRIEVAL_POINTERS_BUFFER(pDest);
 
             // Readjust extents, as it only reflects how much memory was allocated and may not
             // be accurate
@@ -530,23 +515,19 @@ namespace Little_Disk_Defrag.Helpers
         public bool MoveFileDumb (int FileIndice, ulong NewLCN)
         {
             bool ReturnVal;
-            FileInfo Info;
-            SafeFileHandle FileHandle;
-            string FullName;
             PInvoke.MoveFileData MoveData = new PInvoke.MoveFileData();
-            ulong CurrentLCN;
-            ulong CurrentVCN;
 
             // NewLCN can't be less than 0
             if (NewLCN == 0)
                 return false;
 
             // Set up variables
-            Info = GetDBFile ((uint)FileIndice);
-            FullName = GetDBDir (Info.DirIndice);
+            var Info = GetDBFile ((uint)FileIndice);
+            var FullName = GetDBDir (Info.DirIndice);
             FullName += Info.Name;
-            CurrentLCN = NewLCN;
-            CurrentVCN = 0;
+
+            var CurrentLCN = NewLCN;
+            ulong CurrentVCN = 0;
 
             /*
             if (Info.Attributes.Directory == 1)
@@ -556,16 +537,16 @@ namespace Little_Disk_Defrag.Helpers
             */
 
             // Open file
-            FileHandle = PInvoke.CreateFile
-            (
-                FullName,
-                PInvoke.GENERIC_READ,
-                PInvoke.FILE_SHARE_READ,
-                IntPtr.Zero,
-                PInvoke.OPEN_EXISTING,
-                (Info.Attributes.Directory) ? PInvoke.FILE_FLAG_BACKUP_SEMANTICS : 0,
-                IntPtr.Zero
-            );
+            var FileHandle = PInvoke.CreateFile
+                (
+                    FullName,
+                    PInvoke.GENERIC_READ,
+                    PInvoke.FILE_SHARE_READ,
+                    IntPtr.Zero,
+                    PInvoke.OPEN_EXISTING,
+                    (Info.Attributes.Directory) ? PInvoke.FILE_FLAG_BACKUP_SEMANTICS : 0,
+                    IntPtr.Zero
+                );
 
             if (FileHandle.IsClosed || FileHandle.IsInvalid)
             {
@@ -581,7 +562,6 @@ namespace Little_Disk_Defrag.Helpers
                 {
                     for (int i = 0; i < Info.Fragments.Count; i++)
                     {
-                        bool Result;
                         uint BytesReturned = 0;
 
                         //wprintf (L"%3u", i);
@@ -608,17 +588,17 @@ namespace Little_Disk_Defrag.Helpers
                         wprintf (L"\n");
                         */
 
-                        Result = PInvoke.DeviceIoControl
-                        (
-                            Handle,
-                            PInvoke.FSConstants.FSCTL_MOVE_FILE,
-                            pInput,
-                            bufSize,
-                            IntPtr.Zero,
-                            0,
-                            ref BytesReturned,
-                            IntPtr.Zero
-                        );
+                        var Result = PInvoke.DeviceIoControl
+                            (
+                                Handle,
+                                PInvoke.FSConstants.FSCTL_MOVE_FILE,
+                                pInput,
+                                bufSize,
+                                IntPtr.Zero,
+                                0,
+                                ref BytesReturned,
+                                IntPtr.Zero
+                            );
 
                         //wprintf (L"\b\b\b");
 

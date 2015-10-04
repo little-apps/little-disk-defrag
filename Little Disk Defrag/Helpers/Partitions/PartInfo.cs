@@ -52,11 +52,9 @@ namespace Little_Disk_Defrag.Helpers.Partitions
             PInvoke.FileSystemFeature FSFlags;
             StringBuilder FSName = new StringBuilder(64);
 
-            bool Result;
-            uint BytesGot;
             UInt64 nan;
 
-            Result = PInvoke.GetVolumeInformation(Volume.RootPath, VolName, VolName.Capacity, out VolSN, out VolMaxFileLen, out FSFlags, FSName, FSName.Capacity);
+            var Result = PInvoke.GetVolumeInformation(Volume.RootPath, VolName, VolName.Capacity, out VolSN, out VolMaxFileLen, out FSFlags, FSName, FSName.Capacity);
 
             if (Result)
             {
@@ -76,7 +74,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
             int GeometrySize = Marshal.SizeOf(typeof(PInvoke.DISK_GEOMETRY));
             IntPtr GeometryPtr = Marshal.AllocHGlobal(GeometrySize);
 
-            BytesGot = 0;
+            uint BytesGot = 0;
             Result = PInvoke.DeviceIoControl(
                 Volume.Handle,
                 PInvoke.FSConstants.IOCTL_DISK_GET_DRIVE_GEOMETRY,

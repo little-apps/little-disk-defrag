@@ -271,8 +271,6 @@ namespace Little_Disk_Defrag
                     break;
             }
 
-            string Text;
-
             // Volume name
             DriveLetter = DefragReport.RootPath;
 
@@ -334,7 +332,7 @@ namespace Little_Disk_Defrag
             if (DefragReport.AverageFragments >= 1.1D)
                 AFRec = true;
 
-            Text = "* ";
+            var Text = "* ";
 
             if (PFRec)
                 Text += string.Format("{0:F2}% of the files on this volume are fragmented. ", DefragReport.PercentFragged);

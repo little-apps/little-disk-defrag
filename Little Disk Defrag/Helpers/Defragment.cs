@@ -172,9 +172,7 @@ namespace Little_Disk_Defrag.Helpers
         {
             if (!Done)
             {
-                string OldStatus;
-
-                OldStatus = StatusString;
+                var OldStatus = StatusString;
                 StatusPercent = 99.999999f;
 
                 StatusString = "Closing volume " + DriveName;
@@ -361,8 +359,7 @@ namespace Little_Disk_Defrag.Helpers
                     Report.FilesSlackBytes = Report.FilesSizeOnDisk - Report.FilesSizeBytes;
                     Report.PercentFragged = 100.0f * (Report.FraggedFiles.Count / (double)Report.FilesCount);
 
-                    UInt64 Percent;
-                    Percent = (10000 * Report.FilesSlackBytes) / Report.FilesSizeOnDisk;
+                    var Percent = (10000 * Report.FilesSlackBytes) / Report.FilesSizeOnDisk;
                     Report.PercentSlack = (double)Percent / 100.0f;
                 }
                 else
@@ -370,11 +367,6 @@ namespace Little_Disk_Defrag.Helpers
                     // Go through all the files and ... defragment them!
                     for (i = 0; i < Volume.DBFileCount; i++)
                     {
-                        FileInfo Info;
-                        bool Result;
-                        UInt64 TargetLCN;
-                        UInt64 PreviousClusters;
-
                         // What? They want us to pause? Oh ok.
                         if (PleasePause)
                         {
@@ -396,9 +388,9 @@ namespace Little_Disk_Defrag.Helpers
                         }
 
                         //
-                        Info = Volume.GetDBFile(i);
+                        var Info = Volume.GetDBFile(i);
 
-                        PreviousClusters = ClustersProgress;
+                        var PreviousClusters = ClustersProgress;
                         ClustersProgress += Info.Clusters;
 
                         if (!Info.Attributes.Process)
@@ -436,7 +428,8 @@ namespace Little_Disk_Defrag.Helpers
                         while (Retry > 0)
                         {
                             // Find a place that can fit the file
-                            Result = Volume.FindFreeRange(FirstFreeLCN, Info.Clusters, out TargetLCN);
+                            UInt64 TargetLCN;
+                            var Result = Volume.FindFreeRange(FirstFreeLCN, Info.Clusters, out TargetLCN);
 
                             // If yes, try moving it
                             if (Result)

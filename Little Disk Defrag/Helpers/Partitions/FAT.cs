@@ -28,14 +28,12 @@ namespace Little_Disk_Defrag.Helpers.Partitions
         {
             uint BytesRead;
             ulong FATSize;
-            bool result;
 
             IntPtr BootSectorPtr = Marshal.AllocHGlobal(512);
-            PInvoke.FATBootSector BootSector;
 
             NativeOverlapped Overlapped = new NativeOverlapped();
 
-            result = PInvoke.ReadFile(Volume.Handle, BootSectorPtr, 512, out BytesRead, ref Overlapped);
+            var result = PInvoke.ReadFile(Volume.Handle, BootSectorPtr, 512, out BytesRead, ref Overlapped);
 
             if (!result)
             {
@@ -43,7 +41,7 @@ namespace Little_Disk_Defrag.Helpers.Partitions
                 return false;
             }
 
-            BootSector = new PInvoke.FATBootSector(BootSectorPtr);
+            var BootSector = new PInvoke.FATBootSector(BootSectorPtr);
 
             if (BootSector.Signature != 0xAA55 || (((BootSector.BS_jmpBoot[0] != 0xEB) || (BootSector.BS_jmpBoot[2] != 0x90)) && (BootSector.BS_jmpBoot[0] != 0xE9)))
             {
