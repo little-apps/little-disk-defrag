@@ -58,20 +58,15 @@ namespace Little_Disk_Defrag.Misc
                     WindowsPrincipal principal = new WindowsPrincipal(user);
                     isAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
                 }
-                catch (UnauthorizedAccessException)
+                catch
                 {
-                    isAdmin = false;
 #if (DEBUG)
                     throw;
-#endif
-                }
-                catch (Exception)
-                {
+#else
                     isAdmin = false;
-#if (DEBUG)
-                    throw;
 #endif
                 }
+
                 return isAdmin;
             }
         }
