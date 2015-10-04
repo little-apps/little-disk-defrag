@@ -165,10 +165,7 @@ namespace Little_Disk_Defrag.Helpers
             if (!VolumeOpen)
                 return;
 
-            if (Volume == null)
-                return;
-
-            Volume.Dispose();
+            Volume?.Dispose();
         }
 
         public void Close()
