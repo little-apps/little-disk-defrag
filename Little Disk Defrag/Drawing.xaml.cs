@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -84,20 +85,22 @@ namespace Little_Disk_Defrag
 
         private Draw draw;
 
-        private Thread _drawThread;
+        private Task _drawTask;
+        private CancellationTokenSource _cancellationTokenSource;
 
-        public Thread DrawThread
+        public Task DrawTask
         {
             get
             {
-                if (this._drawThread == null)
-                    this._drawThread = new Thread(new ThreadStart(this.DrawBlocks));
-
-                return this._drawThread;
+                if (this._drawTask == null)
+                {
+                    this._cancellationTokenSource = new CancellationTokenSource();
+                    this._drawTask = new Task(DrawBlocks, this._cancellationTokenSource.Token);
+                }
+                    
+                return this._drawTask;
             }
         }
-
-        private object _drawLock = new object();
 
         private DispatcherTimer timer;
 
@@ -142,7 +145,7 @@ namespace Little_Disk_Defrag
 
         public void RefreshDrawing(object o, EventArgs e)
         {
-            if (this.DrawThread.IsAlive)
+            if (this.DrawTask.Status == TaskStatus.Running)
             {
                 this.draw.InvalidateVisual();
             }
@@ -161,23 +164,32 @@ namespace Little_Disk_Defrag
                 this.Height = height;
         }
 
-        public void Redraw()
+        public async void Redraw()
         {
-            lock (this._drawLock)
+            if (this.DrawTask.Status == TaskStatus.Running)
+                this._cancellationTokenSource?.Cancel();
+
+            await Task.Run(() => { while (this.DrawTask.Status == TaskStatus.Running); });
+
+            // Clear canvas
+            this.draw.Clear();
+
+            this.CalculateSizes(this.Width, this.Height);
+
+            if (this.Volume != null && this.sizesCalculated)
             {
-                if (this.DrawThread.IsAlive)
-                    this.DrawThread.Abort();
+                //this._drawThread = new Thread(new ThreadStart(this.DrawBlocks));
+                //this.DrawThread.Start();
 
-                // Clear canvas
-                this.draw.Clear();
+                this._cancellationTokenSource = new CancellationTokenSource();
+                this._drawTask = new Task(DrawBlocks, this._cancellationTokenSource.Token);
 
-                this.CalculateSizes(this.Width, this.Height);
+                this.DrawTask.Start();
 
-                if (this.Volume != null && this.sizesCalculated)
-                {
-                    this._drawThread = new Thread(new ThreadStart(this.DrawBlocks));
-                    this.DrawThread.Start();
-                }
+                await this.DrawTask;
+
+                this._cancellationTokenSource.Dispose();
+                this._cancellationTokenSource = null;
             }
         }
 
@@ -252,6 +264,9 @@ namespace Little_Disk_Defrag
 
             do
             {
+                if (_cancellationTokenSource.IsCancellationRequested)
+                    break;
+
                 GCHandle handle = GCHandle.Alloc(currLcn, GCHandleType.Pinned);
                 CurrentLCNPtr = handle.AddrOfPinnedObject();
 
@@ -276,6 +291,9 @@ namespace Little_Disk_Defrag
 
                 for (i = 0; i < Max; i++)
                 {
+                    if (_cancellationTokenSource.IsCancellationRequested)
+                        break;
+
                     if ((BitmapBuffer.Buffer[i / 8] & BitShift[i % 8]) > 0)
                     {
                         // Cluster is used
