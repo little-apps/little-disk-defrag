@@ -30,7 +30,7 @@ namespace Little_Disk_Defrag.Helpers
         private string _statusString;
         private double _statusPercent;
 
-        private object _lock = new object();
+        private readonly object _lock = new object();
 
         public bool Error;
         public bool Done;

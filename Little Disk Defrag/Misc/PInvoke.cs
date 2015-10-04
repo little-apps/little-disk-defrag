@@ -226,12 +226,9 @@ namespace Little_Disk_Defrag.Misc
         [StructLayout(LayoutKind.Explicit, Size=16)]
         internal struct NTFS_FILE_RECORD_OUTPUT_BUFFER
         {
-            [FieldOffset(0)]
-            LARGE_INTEGER FileReferenceNumber;
-            [FieldOffset(8)]
-            ulong FileRecordLength;
-            [FieldOffset(12)]
-            byte[] FileRecordBuffer;
+            [FieldOffset(0)] readonly LARGE_INTEGER FileReferenceNumber;
+            [FieldOffset(8)] readonly ulong FileRecordLength;
+            [FieldOffset(12)] readonly byte[] FileRecordBuffer;
         }
 
         [StructLayout(LayoutKind.Sequential, Size = 512, Pack=1, CharSet=CharSet.Ansi)]

@@ -23,10 +23,10 @@ namespace Little_Disk_Defrag.Helpers
             public Pen Pen;
         }
 
-        private object _lockObj = new object();
+        private readonly object _lockObj = new object();
 
-        private List<MyRect> rects = new List<MyRect>();
-        private List<MyLine> lines = new List<MyLine>();
+        private readonly List<MyRect> rects = new List<MyRect>();
+        private readonly List<MyLine> lines = new List<MyLine>();
 
         public void Clear()
         {

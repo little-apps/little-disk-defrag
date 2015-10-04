@@ -58,9 +58,9 @@ namespace Little_Disk_Defrag
 
         private readonly Defragment _defragger = new Defragment();
         private Thread _thread;
-        private Timer _timer;
+        private readonly Timer _timer;
 
-        private DispatcherTimer _resizeTimer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 0, 1500), IsEnabled = false };
+        private readonly DispatcherTimer _resizeTimer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 0, 1500), IsEnabled = false };
 
         public List<string> Drives { get; }
 

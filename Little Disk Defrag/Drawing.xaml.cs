@@ -16,11 +16,11 @@ namespace Little_Disk_Defrag
     public partial class Drawing : ContentControl
     {
         #region Colors
-        private static uint ColWhite = 0xFFFFFF;
-        private static uint ColBG = 0xFFFFFF;
+        private static readonly uint ColWhite = 0xFFFFFF;
+        private static readonly uint ColBG = 0xFFFFFF;
 
         private static uint ColDir = 0xCC0000;
-        private static uint ColFile = 0x009900;
+        private static readonly uint ColFile = 0x009900;
         private static uint ColFileFixed = 0x005500;
         private static uint ColFrag = 0x0000FF;
         private static uint ColFragFixed = 0x0000CC;
@@ -29,7 +29,7 @@ namespace Little_Disk_Defrag
         private static uint ColComp = 0x00CCFF;
         private static uint ColCompFrag = 0x0066FF;
         private static uint ColLocked = 0x003399;
-        private static uint ColMarks = 0x99CCCC;
+        private static readonly uint ColMarks = 0x99CCCC;
         private static uint ColWrite = 0xFFCCCC;
         private static uint ColWriteDone = 0xFF6666;
         private static uint ColRead = 0x00FFFF;
@@ -56,7 +56,7 @@ namespace Little_Disk_Defrag
             }
         }
 
-        ulong colorSteps = 6;
+        readonly ulong colorSteps = 6;
 
         int blocksPerLine;
         int blockLines;
@@ -69,7 +69,7 @@ namespace Little_Disk_Defrag
 
         private static double ThreadSafeWidth = double.NaN;
 
-        private Draw draw;
+        private readonly Draw draw;
 
         private Task _drawTask;
         private CancellationTokenSource _cancellationTokenSource;
